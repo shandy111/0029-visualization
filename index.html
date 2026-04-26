@@ -1,6 +1,268 @@
 <!DOCTYPE html>
-<html>
-  <body>
-    <h1>Hello EV London</h1>
-  </body>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>EV Charging Map - London</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel='stylesheet' href='https://unpkg.com/maplibre-gl@5.18.0/dist/maplibre-gl.css' />
+  <script src='https://unpkg.com/maplibre-gl@5.18.0/dist/maplibre-gl.js'></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; background: #f8f8f6; }
+
+    #page-title {
+      background: #1a3a5c;
+      color: white;
+      padding: 14px 24px;
+      font-size: 17px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    #page-title span {
+      font-size: 12px;
+      font-weight: normal;
+      opacity: 0.75;
+      background: rgba(255,255,255,0.15);
+      padding: 3px 10px;
+      border-radius: 4px;
+    }
+
+    #map-container {
+      position: relative;
+      height: calc(100vh - 50px);
+    }
+    #map { height: 100%; width: 100%; }
+
+    #legend {
+      position: absolute;
+      bottom: 28px;
+      left: 14px;
+      background: white;
+      padding: 13px 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      font-size: 12px;
+      z-index: 10;
+      min-width: 200px;
+    }
+    #legend h4 {
+      font-size: 12px;
+      color: #1a3a5c;
+      margin-bottom: 9px;
+      font-weight: bold;
+    }
+    .li { display: flex; align-items: center; margin-bottom: 6px; }
+    .lc { width: 20px; height: 13px; margin-right: 9px; border-radius: 2px; flex-shrink: 0; }
+    .legend-divider {
+      border: none;
+      border-top: 1px solid #eee;
+      margin: 9px 0;
+    }
+    .legend-line {
+      display: flex;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+    .legend-dash {
+      width: 20px;
+      height: 3px;
+      background: #e07b39;
+      margin-right: 9px;
+      flex-shrink: 0;
+    }
+
+    #tooltip {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      background: white;
+      padding: 14px 16px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      font-size: 13px;
+      z-index: 10;
+      min-width: 215px;
+    }
+    #tooltip h4 {
+      font-size: 14px;
+      color: #1a3a5c;
+      margin-bottom: 8px;
+      padding-bottom: 7px;
+      border-bottom: 1px solid #eee;
+    }
+    #tooltip p { margin: 5px 0; color: #555; line-height: 1.5; }
+    #tooltip span { font-weight: 600; color: #1a3a5c; }
+    .itag {
+      display: inline-block;
+      padding: 1px 8px;
+      border-radius: 3px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .itag.inner { background: #1a3a5c; color: white; }
+    .itag.outer { background: #a8c8e8; color: #1a3a5c; }
+
+    #info-box {
+      position: absolute;
+      bottom: 28px;
+      right: 14px;
+      background: rgba(26,58,92,0.88);
+      color: white;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      z-index: 10;
+      line-height: 1.7;
+    }
+    #info-box b { color: #e07b39; }
+  </style>
+</head>
+<body>
+
+<div id="page-title">
+  EV Charging in London — Spatial Distribution
+  <span>Step 1: Does inequality exist?</span>
+</div>
+
+<div id="map-container">
+  <div id="map"></div>
+
+  <div id="legend">
+    <h4>Chargers per 10,000 residents</h4>
+    <div class="li"><div class="lc" style="background:#f7fbff;border:1px solid #ddd"></div> 0</div>
+    <div class="li"><div class="lc" style="background:#c6dbef"></div> 1 – 5</div>
+    <div class="li"><div class="lc" style="background:#6baed6"></div> 5 – 15</div>
+    <div class="li"><div class="lc" style="background:#2171b5"></div> 15 – 40</div>
+    <div class="li"><div class="lc" style="background:#08306b"></div> 40+</div>
+    <hr class="legend-divider">
+    <div class="legend-line">
+      <div class="legend-dash"></div>
+      <span style="color:#444">Inner London boundary</span>
+    </div>
+  </div>
+
+  <div id="info-box">
+    <b>Inner London</b>: 14 boroughs<br>
+    <b>Outer London</b>: 19 boroughs<br>
+    Hover over any area for details
+  </div>
+
+  <div id="tooltip">
+    <h4>Hover over an area</h4>
+    <p style="color:#999;font-size:12px">
+      Move your mouse over the map<br>to explore LSOA-level data
+    </p>
+  </div>
+</div>
+
+<script>
+  const map = new maplibregl.Map({
+    container: 'map',
+    style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+    center: [-0.1278, 51.5074],
+    zoom: 10
+  });
+
+  map.addControl(new maplibregl.NavigationControl(), 'top-left');
+
+  map.on('load', () => {
+
+    // LSOA choropleth
+    map.addSource('lsoa', {
+      type: 'geojson',
+      data: 'data/lsoa_ev.geojson'
+    });
+
+    map.addLayer({
+      id: 'lsoa-fill',
+      type: 'fill',
+      source: 'lsoa',
+      paint: {
+        'fill-color': [
+          'interpolate', ['linear'],
+          ['get', 'chargers_per_10k'],
+          0,   '#f7fbff',
+          5,   '#c6dbef',
+          15,  '#6baed6',
+          40,  '#2171b5',
+          100, '#08306b'
+        ],
+        'fill-opacity': 0.75
+      }
+    });
+
+    map.addLayer({
+      id: 'lsoa-border',
+      type: 'line',
+      source: 'lsoa',
+      paint: {
+        'line-color': '#bbb',
+        'line-width': 0.3,
+        'line-opacity': 0.5
+      }
+    });
+
+    // Hover highlight
+    map.addLayer({
+      id: 'lsoa-hover',
+      type: 'fill',
+      source: 'lsoa',
+      paint: {
+        'fill-color': '#e07b39',
+        'fill-opacity': 0.45
+      },
+      filter: ['==', 'LSOA21CD', '']
+    });
+
+    // Inner London boundary
+    map.addSource('inner-boundary', {
+      type: 'geojson',
+      data: 'data/inner_london_boundary.geojson'
+    });
+
+    map.addLayer({
+      id: 'inner-outline',
+      type: 'line',
+      source: 'inner-boundary',
+      paint: {
+        'line-color': '#e07b39',
+        'line-width': 2.5,
+        'line-dasharray': [4, 2]
+      }
+    });
+
+    // Hover events
+    map.on('mousemove', 'lsoa-fill', (e) => {
+      const p = e.features[0].properties;
+      map.setFilter('lsoa-hover', ['==', 'LSOA21CD', p.LSOA21CD]);
+      map.getCanvas().style.cursor = 'pointer';
+
+      const isInner = p.inner_outer === 'Inner';
+      document.getElementById('tooltip').innerHTML = `
+        <h4>${p.LSOA21NM}</h4>
+        <p>Borough: <span>${p.borough}</span></p>
+        <p>Zone: <span class="itag ${isInner ? 'inner' : 'outer'}">${p.inner_outer} London</span></p>
+        <p>Chargers: <span>${p.charger_count}</span></p>
+        <p>Per 10k residents: <span>${parseFloat(p.chargers_per_10k).toFixed(1)}</span></p>
+        <p>IMD Decile: <span>${p.imd_decile}${p.imd_decile == 1 ? ' (most deprived)' : p.imd_decile == 10 ? ' (least deprived)' : ''}</span></p>
+        <p>Has charger: <span>${p.has_charger ? '✓ Yes' : '✗ No'}</span></p>
+      `;
+    });
+
+    map.on('mouseleave', 'lsoa-fill', () => {
+      map.setFilter('lsoa-hover', ['==', 'LSOA21CD', '']);
+      map.getCanvas().style.cursor = '';
+      document.getElementById('tooltip').innerHTML = `
+        <h4>Hover over an area</h4>
+        <p style="color:#999;font-size:12px">
+          Move your mouse over the map<br>to explore LSOA-level data
+        </p>
+      `;
+    });
+
+  });
+</script>
+</body>
 </html>
