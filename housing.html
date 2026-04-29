@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Housing Type & EV Charging</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel='stylesheet' href='https://unpkg.com/maplibre-gl@5.18.0/dist/maplibre-gl.css'/>
+  <script src='https://unpkg.com/maplibre-gl@5.18.0/dist/maplibre-gl.js'></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #faf8f3;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+    .header {
+      background: #1a3a5c;
+      color: white;
+      padding: 13px 22px;
+      font-size: 15px;
+      font-weight: bold;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .header span { font-size: 12px; font-weight: normal; opacity: 0.7; }
+    .main { display: flex; flex: 1; overflow: hidden; }
+    .sidebar {
+      width: 380px;
+      flex-shrink: 0;
+      background: white;
+      border-right: 1px solid #e8e4da;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      padding: 18px 20px;
+    }
+    .sidebar h3 {
+      font-size: 12px;
+      color: #1a3a5c;
+      margin-bottom: 10px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .tenure-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 10px 13px;
+      margin-bottom: 7px;
+      border: 1.5px solid #ddd;
+      border-radius: 7px;
+      background: white;
+      font-size: 12px;
+      color: #444;
+      cursor: pointer;
+      transition: all 0.2s;
+      line-height: 1.5;
+    }
+    .tenure-btn:hover { border-color: #1a3a5c; color: #1a3a5c; }
+    .tenure-btn.active { background: #1a3a5c; color: white; border-color: #1a3a5c; }
+    .tenure-btn .t-label { font-weight: bold; font-size: 12px; }
+    .tenure-btn .t-sub { font-size: 11px; opacity: 0.72; margin-top: 2px; }
+    .divider { border: none; border-top: 1px solid #eee; margin: 14px 0; }
+    .chart-box { margin-bottom: 18px; }
+    .chart-box h4 { font-size: 12px; color: #1a3a5c; margin-bottom: 8px; font-weight: bold; }
+    .finding {
+      font-size: 11px;
+      color: #555;
+      line-height: 1.65;
+      margin-top: 8px;
+      padding: 8px 10px;
+      background: #f0f4f8;
+      border-left: 2px solid #e07b39;
+      border-radius: 0 4px 4px 0;
+    }
+    .map-area { flex: 1; position: relative; }
+    #map { width: 100%; height: 100%; }
+    #map-legend {
+      position: absolute;
+      bottom: 24px;
+      left: 14px;
+      background: white;
+      padding: 12px 14px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+      font-size: 11px;
+      z-index: 10;
+      min-width: 175px;
+    }
+    #map-legend h4 { font-size: 11px; color: #1a3a5c; margin-bottom: 8px; font-weight: bold; }
+    .li { display: flex; align-items: center; margin-bottom: 5px; }
+    .lc { width: 18px; height: 11px; margin-right: 8px; border-radius: 2px; flex-shrink: 0; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  Housing Tenure & EV Charging Access
+  <span>How does housing type relate to charging inequality?</span>
+</div>
+
+<div class="main">
+  <div class="sidebar">
+    <h3>Select Housing Type</h3>
+
+    <button class="tenure-btn active" onclick="switchTenure('pct_owned', this, '% Owned Housing')">
+      <div class="t-label">Owned</div>
+      <div class="t-sub">Outright ownership + mortgage</div>
+    </button>
+    <button class="tenure-btn" onclick="switchTenure('pct_private_rented', this, '% Private Rented')">
+      <div class="t-label">Private Rented</div>
+      <div class="t-sub">Renting from private landlord</div>
+    </button>
+    <button class="tenure-btn" onclick="switchTenure('pct_social_rented', this, '% Social Rented')">
+      <div class="t-label">Social Rented</div>
+      <div class="t-sub">Council or housing association</div>
+    </button>
+    <button class="tenure-btn" onclick="switchTenure('pct_shared', this, '% Shared Ownership')">
+      <div class="t-label">Shared Ownership</div>
+      <div class="t-sub">Part-own, part-rent</div>
+    </button>
+
+    <hr class="divider">
+
+    <div class="chart-box">
+      <h4>Owned Housing vs Charger Density</h4>
+      <canvas id="scatterChart" height="150"></canvas>
+      <div class="finding" id="scatter-finding">Loading...</div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="chart-box">
+      <h4>Housing Mix: Inner vs Outer London</h4>
+      <canvas id="innerOuterChart" height="150"></canvas>
+      <div class="finding" id="io-finding">Loading...</div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="chart-box">
+      <h4>Charger Density by Ownership Level</h4>
+      <canvas id="groupChart" height="130"></canvas>
+      <div class="finding" id="group-finding">Loading...</div>
+    </div>
+  </div>
+
+  <div class="map-area">
+    <div id="map"></div>
+    <div id="map-legend">
+      <h4 id="legend-title">% Owned Housing</h4>
+      <div class="li"><div class="lc" style="background:#f7fbff;border:1px solid #ddd"></div> 0–20%</div>
+      <div class="li"><div class="lc" style="background:#c6dbef"></div> 20–40%</div>
+      <div class="li"><div class="lc" style="background:#6baed6"></div> 40–60%</div>
+      <div class="li"><div class="lc" style="background:#2171b5"></div> 60–80%</div>
+      <div class="li"><div class="lc" style="background:#08306b"></div> 80%+</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const map = new maplibregl.Map({
+    container: 'map',
+    style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+    center: [-0.1278, 51.5074],
+    zoom: 10
+  });
+
+  map.addControl(new maplibregl.NavigationControl(), 'top-right');
+
+  let currentField = 'pct_owned';
+
+  function makeColor(field) {
+    return [
+      'interpolate', ['linear'], ['get', field],
+      0,  '#f7fbff',
+      20, '#c6dbef',
+      40, '#6baed6',
+      60, '#2171b5',
+      80, '#08306b'
+    ];
+  }
+
+  map.on('load', () => {
+    map.addSource('lsoa', {
+      type: 'geojson',
+      data: 'data/lsoa_ev.geojson'
+    });
+
+    map.addLayer({
+      id: 'lsoa-fill',
+      type: 'fill',
+      source: 'lsoa',
+      paint: {
+        'fill-color': makeColor('pct_owned'),
+        'fill-opacity': 0.75
+      }
+    });
+
+    map.addLayer({
+      id: 'lsoa-border',
+      type: 'line',
+      source: 'lsoa',
+      paint: { 'line-color': '#ccc', 'line-width': 0.3 }
+    });
+
+    loadCharts();
+  });
+
+  function switchTenure(field, btn, label) {
+    currentField = field;
+    document.querySelectorAll('.tenure-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    map.setPaintProperty('lsoa-fill', 'fill-color', makeColor(field));
+    document.getElementById('legend-title').textContent = label;
+  }
+
+  let scatterChart, ioChart, groupChart;
+
+  function loadCharts() {
+    fetch('data/lsoa_ev.geojson')
+      .then(r => r.json())
+      .then(geojson => {
+        const data = geojson.features
+          .map(f => f.properties)
+          .filter(d =>
+            d.pct_owned != null &&
+            d.chargers_per_10k != null &&
+            d.chargers_per_10k < 200
+          );
+
+        const inner = data.filter(d => d.inner_outer === 'Inner');
+        const outer = data.filter(d => d.inner_outer === 'Outer');
+
+        // 图1：散点图 蓝橙对比
+        if (scatterChart) scatterChart.destroy();
+        scatterChart = new Chart(document.getElementById('scatterChart'), {
+          type: 'scatter',
+          data: {
+            datasets: [
+              {
+                label: 'Inner London',
+                data: inner.map(d => ({ x: d.pct_owned, y: d.chargers_per_10k })),
+                backgroundColor: 'rgba(26,58,92,0.5)',
+                pointRadius: 2.5
+              },
+              {
+                label: 'Outer London',
+                data: outer.map(d => ({ x: d.pct_owned, y: d.chargers_per_10k })),
+                backgroundColor: 'rgba(224,123,57,0.45)',
+                pointRadius: 2.5
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                display: true,
+                labels: { font: { size: 10 }, boxWidth: 10 }
+              },
+              tooltip: {
+                callbacks: {
+                  label: ctx => `Owned: ${ctx.parsed.x.toFixed(1)}% | Chargers: ${ctx.parsed.y.toFixed(1)}/10k`
+                }
+              }
+            },
+            scales: {
+              x: {
+                title: { display: true, text: '% Owned housing', font: { size: 10 } },
+                ticks: { font: { size: 10 } }
+              },
+              y: {
+                beginAtZero: true,
+                title: { display: true, text: 'Chargers per 10k', font: { size: 10 } },
+                ticks: { font: { size: 10 } }
+              }
+            }
+          }
+        });
+
+        const n = data.length;
+        const meanX = data.reduce((s, d) => s + d.pct_owned, 0) / n;
+        const meanY = data.reduce((s, d) => s + d.chargers_per_10k, 0) / n;
+        const num = data.reduce((s, d) =>
+          s + (d.pct_owned - meanX) * (d.chargers_per_10k - meanY), 0);
+        const den = Math.sqrt(
+          data.reduce((s, d) => s + Math.pow(d.pct_owned - meanX, 2), 0) *
+          data.reduce((s, d) => s + Math.pow(d.chargers_per_10k - meanY, 2), 0)
+        );
+        const r = (num / den).toFixed(2);
+
+        document.getElementById('scatter-finding').innerHTML =
+          `Correlation r = <strong>${r}</strong>. Areas with higher owner-occupation 
+          tend to have <strong>fewer public chargers</strong>, consistent with 
+          homeowners relying on private home charging rather than public infrastructure.`;
+
+        // 图2：Inner vs Outer 蓝橙对比
+        const tenureGroups = [
+          { key: 'pct_owned',          label: 'Owned' },
+          { key: 'pct_private_rented', label: 'Private\nRented' },
+          { key: 'pct_social_rented',  label: 'Social\nRented' },
+          { key: 'pct_shared',         label: 'Shared' }
+        ];
+
+        const avgInner = tenureGroups.map(g =>
+          (inner.reduce((s, d) => s + (d[g.key] || 0), 0) / inner.length).toFixed(1)
+        );
+        const avgOuter = tenureGroups.map(g =>
+          (outer.reduce((s, d) => s + (d[g.key] || 0), 0) / outer.length).toFixed(1)
+        );
+
+        if (ioChart) ioChart.destroy();
+        ioChart = new Chart(document.getElementById('innerOuterChart'), {
+          type: 'bar',
+          data: {
+            labels: tenureGroups.map(g => g.label),
+            datasets: [
+              {
+                label: 'Inner London',
+                data: avgInner,
+                backgroundColor: '#1a3a5c',
+                borderRadius: 3
+              },
+              {
+                label: 'Outer London',
+                data: avgOuter,
+                backgroundColor: '#e07b39',
+                borderRadius: 3
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                display: true,
+                labels: { font: { size: 10 }, boxWidth: 10 }
+              }
+            },
+            scales: {
+              x: { ticks: { font: { size: 10 } } },
+              y: {
+                beginAtZero: true,
+                title: { display: true, text: 'Avg %', font: { size: 10 } },
+                ticks: { font: { size: 10 } }
+              }
+            }
+          }
+        });
+
+        const innerOwned = parseFloat(avgInner[0]);
+        const outerOwned = parseFloat(avgOuter[0]);
+        document.getElementById('io-finding').innerHTML =
+          `Outer London has more owner-occupied housing 
+          (<strong>${outerOwned}%</strong>) vs Inner London 
+          (<strong>${innerOwned}%</strong>), yet Inner London has far 
+          more public chargers — suggesting borough policy dominates 
+          over housing demand patterns.`;
+
+        // 图3：四分位 暖到冷渐变
+        const sorted = [...data].sort((a, b) => a.pct_owned - b.pct_owned);
+        const q = Math.floor(sorted.length / 4);
+        const groups = [
+          { label: 'Low (0–25%)',  data: sorted.slice(0, q) },
+          { label: 'Mid-Low',      data: sorted.slice(q, q*2) },
+          { label: 'Mid-High',     data: sorted.slice(q*2, q*3) },
+          { label: 'High (75%+)', data: sorted.slice(q*3) }
+        ];
+
+        const groupAvg = groups.map(g =>
+          (g.data.reduce((s, d) => s + d.chargers_per_10k, 0) / g.data.length).toFixed(1)
+        );
+
+        if (groupChart) groupChart.destroy();
+        groupChart = new Chart(document.getElementById('groupChart'), {
+          type: 'bar',
+          data: {
+            labels: groups.map(g => g.label),
+            datasets: [{
+              data: groupAvg,
+              backgroundColor: ['#e07b39', '#f4a261', '#74c69d', '#1a3a5c'],
+              borderRadius: 4
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { ticks: { font: { size: 10 } } },
+              y: {
+                beginAtZero: true,
+                title: {
+                  display: true,
+                  text: 'Avg chargers per 10k',
+                  font: { size: 10 }
+                },
+                ticks: { font: { size: 10 } }
+              }
+            }
+          }
+        });
+
+        const low  = parseFloat(groupAvg[0]);
+        const high = parseFloat(groupAvg[3]);
+        document.getElementById('group-finding').innerHTML =
+          `LSOAs with low owner-occupation average 
+          <strong>${low} chargers/10k</strong> vs 
+          <strong>${high}</strong> in high ownership areas. 
+          Renters rely more heavily on public charging infrastructure.`;
+      });
+  }
+</script>
+</body>
+</html>
