@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Occupation & EV Charging</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel='stylesheet' href='https://unpkg.com/maplibre-gl@5.18.0/dist/maplibre-gl.css'/>
+  <script src='https://unpkg.com/maplibre-gl@5.18.0/dist/maplibre-gl.js'></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; background: #f8f8f6; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+    .header {
+      background: #1a3a5c;
+      color: white;
+      padding: 12px 20px;
+      font-size: 15px;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+    .header span {
+      font-size: 12px;
+      font-weight: normal;
+      opacity: 0.7;
+      margin-left: 10px;
+    }
+
+    .main {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* 左侧面板 */
+    .sidebar {
+      width: 300px;
+      flex-shrink: 0;
+      background: white;
+      border-right: 1px solid #e0e0e0;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      padding: 16px;
+    }
+
+    .sidebar h3 {
+      font-size: 13px;
+      color: #1a3a5c;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+
+    .occ-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 9px 12px;
+      margin-bottom: 6px;
+      border: 1.5px solid #ddd;
+      border-radius: 6px;
+      background: white;
+      font-size: 12px;
+      color: #444;
+      cursor: pointer;
+      transition: all 0.2s;
+      line-height: 1.4;
+    }
+    .occ-btn:hover { border-color: #1a3a5c; color: #1a3a5c; }
+    .occ-btn.active {
+      background: #1a3a5c;
+      color: white;
+      border-color: #1a3a5c;
+    }
+    .occ-btn .occ-label { font-weight: bold; font-size: 12px; }
+    .occ-btn .occ-sub { font-size: 11px; opacity: 0.75; margin-top: 2px; }
+
+    .divider { border: none; border-top: 1px solid #eee; margin: 14px 0; }
+
+    .chart-box { margin-bottom: 16px; }
+    .chart-box h4 {
+      font-size: 12px;
+      color: #1a3a5c;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+    .chart-box .finding {
+      font-size: 11px;
+      color: #666;
+      line-height: 1.6;
+      margin-top: 8px;
+      padding: 8px 10px;
+      background: #f0f4f8;
+      border-left: 2px solid #e07b39;
+      border-radius: 0 4px 4px 0;
+    }
+
+    /* 地图区域 */
+    .map-area {
+      flex: 1;
+      position: relative;
+    }
+    #map { width: 100%; height: 100%; }
+
+    #map-legend {
+      position: absolute;
+      bottom: 24px;
+      left: 14px;
+      background: white;
+      padding: 11px 13px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      font-size: 11px;
+      z-index: 10;
+      min-width: 170px;
+    }
+    #map-legend h4 { font-size: 11px; color: #1a3a5c; margin-bottom: 7px; font-weight: bold; }
+    .li { display: flex; align-items: center; margin-bottom: 4px; }
+    .lc { width: 18px; height: 11px; margin-right: 7px; border-radius: 2px; flex-shrink: 0; }
+
+    #map-tooltip {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      background: white;
+      padding: 12px 14px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      font-size: 12px;
+      z-index: 10;
+      min-width: 200px;
+    }
+    #map-tooltip h4 { font-size: 13px; color: #1a3a5c; margin-bottom: 7px; padding-bottom: 6px; border-bottom: 1px solid #eee; }
+    #map-tooltip p { margin: 4px 0; color: #555; }
+    #map-tooltip span { font-weight: 600; color: #1a3a5c; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  Occupation Type & EV Charging Access
+  <span>How does occupational composition relate to charging inequality?</span>
+</div>
+
+<div class="main">
+
+  <!-- 左侧面板 -->
+  <div class="sidebar">
+    <h3>Select Occupation Type</h3>
+
+    <button class="occ-btn active" onclick="switchOcc('pct_higher', this)">
+      <div class="occ-label">Higher Managerial</div>
+      <div class="occ-sub">L1–L3: Senior managers, directors, professionals</div>
+    </button>
+    <button class="occ-btn" onclick="switchOcc('pct_lower', this)">
+      <div class="occ-label">Lower Managerial</div>
+      <div class="occ-sub">L4–L6: Mid-level managers, associate professionals</div>
+    </button>
+    <button class="occ-btn" onclick="switchOcc('pct_intermediate', this)">
+      <div class="occ-label">Intermediate</div>
+      <div class="occ-sub">L7: Clerical, sales, service occupations</div>
+    </button>
+    <button class="occ-btn" onclick="switchOcc('pct_self', this)">
+      <div class="occ-label">Self-employed</div>
+      <div class="occ-sub">L8–L11: Small employers, own account workers</div>
+    </button>
+    <button class="occ-btn" onclick="switchOcc('pct_routine', this)">
+      <div class="occ-label">Routine & Manual</div>
+      <div class="occ-sub">L12–L14: Semi-routine and routine occupations</div>
+    </button>
+
+    <hr class="divider">
+
+    <!-- 小图1：各职业类别 vs charger密度 -->
+    <div class="chart-box">
+      <h4>Avg Charger Density by Occupation Group</h4>
+      <canvas id="occBarChart" height="160"></canvas>
+      <div class="finding" id="bar-finding">Loading...</div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- 小图2：Inner vs Outer职业构成 -->
+    <div class="chart-box">
+      <h4>Occupation Mix: Inner vs Outer London</h4>
+      <canvas id="innerOuterChart" height="160"></canvas>
+      <div class="finding" id="io-finding">Loading...</div>
+    </div>
+  </div>
+
+  <!-- 地图 -->
+  <div class="map-area">
+    <div id="map"></div>
+
+    <div id="map-legend">
+      <h4 id="legend-title">% Higher Managerial</h4>
+      <div class="li"><div class="lc" style="background:#f7f7f7;border:1px solid #ddd"></div> 0–10%</div>
+      <div class="li"><div class="lc" style="background:#d1e5f0"></div> 10–20%</div>
+      <div class="li"><div class="lc" style="background:#92c5de"></div> 20–30%</div>
+      <div class="li"><div class="lc" style="background:#4393c3"></div> 30–40%</div>
+      <div class="li"><div class="lc" style="background:#2166ac"></div> 40%+</div>
+    </div>
+
+    <div id="map-tooltip">
+      <h4>Hover over an area</h4>
+      <p style="color:#999;font-size:11px">Move mouse over map to see details</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ===== MAP =====
+  const map = new maplibregl.Map({
+    container: 'map',
+    style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+    center: [-0.1278, 51.5074],
+    zoom: 10
+  });
+
+  map.addControl(new maplibregl.NavigationControl(), 'top-right');
+
+  const occFields = {
+    pct_higher:       { label: '% Higher Managerial', color: '#2166ac' },
+    pct_lower:        { label: '% Lower Managerial',  color: '#1b7837' },
+    pct_intermediate: { label: '% Intermediate',      color: '#762a83' },
+    pct_self:         { label: '% Self-employed',     color: '#d6604d' },
+    pct_routine:      { label: '% Routine & Manual',  color: '#b35806' }
+  };
+
+  let currentField = 'pct_higher';
+
+  map.on('load', () => {
+    map.addSource('lsoa', {
+      type: 'geojson',
+      data: 'data/lsoa_ev.geojson'
+    });
+
+    map.addLayer({
+      id: 'lsoa-fill',
+      type: 'fill',
+      source: 'lsoa',
+      paint: {
+        'fill-color': makeColorExpr('pct_higher', '#2166ac'),
+        'fill-opacity': 0.75
+      }
+    });
+
+    map.addLayer({
+      id: 'lsoa-border',
+      type: 'line',
+      source: 'lsoa',
+      paint: { 'line-color': '#ccc', 'line-width': 0.3 }
+    });
+
+    map.addLayer({
+      id: 'lsoa-hover',
+      type: 'fill',
+      source: 'lsoa',
+      paint: { 'fill-color': '#e07b39', 'fill-opacity': 0.5 },
+      filter: ['==', 'LSOA21CD', '']
+    });
+
+    map.on('mousemove', 'lsoa-fill', (e) => {
+      const p = e.features[0].properties;
+      map.setFilter('lsoa-hover', ['==', 'LSOA21CD', p.LSOA21CD]);
+      map.getCanvas().style.cursor = 'pointer';
+
+      const fieldLabel = occFields[currentField].label;
+      const fieldVal = p[currentField] != null ? parseFloat(p[currentField]).toFixed(1) + '%' : 'N/A';
+
+      document.getElementById('map-tooltip').innerHTML = `
+        <h4>${p.LSOA21NM}</h4>
+        <p>Borough: <span>${p.borough}</span></p>
+        <p>Zone: <span>${p.inner_outer} London</span></p>
+        <p>${fieldLabel}: <span>${fieldVal}</span></p>
+        <p>Chargers per 10k: <span>${parseFloat(p.chargers_per_10k).toFixed(1)}</span></p>
+        <p>IMD Decile: <span>${p.imd_decile}</span></p>
+      `;
+    });
+
+    map.on('mouseleave', 'lsoa-fill', () => {
+      map.setFilter('lsoa-hover', ['==', 'LSOA21CD', '']);
+      map.getCanvas().style.cursor = '';
+      document.getElementById('map-tooltip').innerHTML = `
+        <h4>Hover over an area</h4>
+        <p style="color:#999;font-size:11px">Move mouse over map to see details</p>
+      `;
+    });
+
+    // 加载图表
+    loadCharts();
+  });
+
+  function makeColorExpr(field, baseColor) {
+    return [
+      'interpolate', ['linear'], ['get', field],
+      0,  '#f7f7f7',
+      10, '#d1e5f0',
+      20, '#92c5de',
+      30, '#4393c3',
+      40, baseColor
+    ];
+  }
+
+  function switchOcc(field, btn) {
+    currentField = field;
+    document.querySelectorAll('.occ-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    const info = occFields[field];
+    map.setPaintProperty('lsoa-fill', 'fill-color', makeColorExpr(field, info.color));
+    document.getElementById('legend-title').textContent = info.label;
+  }
+
+  // ===== CHARTS =====
+  let barChart, ioChart;
+
+  function loadCharts() {
+    fetch('data/lsoa_ev.geojson')
+      .then(r => r.json())
+      .then(geojson => {
+        const data = geojson.features.map(f => f.properties).filter(d =>
+          d.pct_higher != null && d.chargers_per_10k != null && d.chargers_per_10k < 200
+        );
+
+        const inner = data.filter(d => d.inner_outer === 'Inner');
+        const outer = data.filter(d => d.inner_outer === 'Outer');
+
+        const occGroups = [
+          { key: 'pct_higher',       label: 'Higher\nManagerial' },
+          { key: 'pct_lower',        label: 'Lower\nManagerial' },
+          { key: 'pct_intermediate', label: 'Intermediate' },
+          { key: 'pct_self',         label: 'Self-\nemployed' },
+          { key: 'pct_routine',      label: 'Routine\n& Manual' }
+        ];
+
+        // 图1：各职业类别 vs 平均charger密度
+        // 按各职业比例四分位分组，取高比例组的平均charger密度
+        const avgChargerByOcc = occGroups.map(g => {
+          const sorted = [...data].sort((a, b) => b[g.key] - a[g.key]);
+          const top25 = sorted.slice(0, Math.floor(sorted.length * 0.25));
+          return (top25.reduce((s, d) => s + d.chargers_per_10k, 0) / top25.length).toFixed(1);
+        });
+
+        if (barChart) barChart.destroy();
+        barChart = new Chart(document.getElementById('occBarChart'), {
+          type: 'bar',
+          data: {
+            labels: ['Higher Mgr', 'Lower Mgr', 'Intermediate', 'Self-emp', 'Routine'],
+            datasets: [{
+              data: avgChargerByOcc,
+              backgroundColor: ['#2166ac','#1b7837','#762a83','#d6604d','#b35806'],
+              borderRadius: 3
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { ticks: { font: { size: 10 } } },
+              y: {
+                beginAtZero: true,
+                title: { display: true, text: 'Avg chargers/10k (top 25% LSOAs)', font: { size: 10 } }
+              }
+            }
+          }
+        });
+
+        document.getElementById('bar-finding').textContent =
+          `LSOAs with high proportions of higher managerial residents tend to have more chargers, ` +
+          `but the pattern is not consistent across all occupation groups.`;
+
+        // 图2：Inner vs Outer职业构成
+        const occLabels = ['Higher Mgr', 'Lower Mgr', 'Intermediate', 'Self-emp', 'Routine'];
+        const avgInner = occGroups.map(g =>
+          (inner.reduce((s, d) => s + (d[g.key] || 0), 0) / inner.length).toFixed(1)
+        );
+        const avgOuter = occGroups.map(g =>
+          (outer.reduce((s, d) => s + (d[g.key] || 0), 0) / outer.length).toFixed(1)
+        );
+
+        if (ioChart) ioChart.destroy();
+        ioChart = new Chart(document.getElementById('innerOuterChart'), {
+          type: 'bar',
+          data: {
+            labels: occLabels,
+            datasets: [
+              {
+                label: 'Inner London',
+                data: avgInner,
+                backgroundColor: '#1a3a5c',
+                borderRadius: 3
+              },
+              {
+                label: 'Outer London',
+                data: avgOuter,
+                backgroundColor: '#a8c8e8',
+                borderRadius: 3
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: { display: true, labels: { font: { size: 10 }, boxWidth: 12 } }
+            },
+            scales: {
+              x: { ticks: { font: { size: 10 } } },
+              y: {
+                beginAtZero: true,
+                title: { display: true, text: 'Avg % of residents', font: { size: 10 } }
+              }
+            }
+          }
+        });
+
+        document.getElementById('io-finding').textContent =
+          `Inner London has a higher proportion of higher managerial residents, ` +
+          `which partially overlaps with its higher charger density.`;
+      });
+  }
+</script>
+</body>
+</html>

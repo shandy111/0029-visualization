@@ -2,266 +2,504 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>EV Charging Map - London</title>
+  <title>EV Charging Inequality in London</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel='stylesheet' href='https://unpkg.com/maplibre-gl@5.18.0/dist/maplibre-gl.css' />
-  <script src='https://unpkg.com/maplibre-gl@5.18.0/dist/maplibre-gl.js'></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: Arial, sans-serif; background: #f8f8f6; }
-
-    #page-title {
-      background: #1a3a5c;
-      color: white;
-      padding: 14px 24px;
-      font-size: 17px;
-      font-weight: bold;
-      display: flex;
-      align-items: center;
-      gap: 12px;
+    
+    body {
+      font-family: Arial, sans-serif;
+      color: #2c2c2a;
+      scroll-behavior: smooth;
     }
-    #page-title span {
-      font-size: 12px;
-      font-weight: normal;
-      opacity: 0.75;
+
+    /* 导航栏 */
+    nav {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      background: rgba(26,58,92,0.95);
+      z-index: 1000;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 32px;
+      height: 52px;
+    }
+    nav .logo {
+      color: white;
+      font-size: 14px;
+      font-weight: bold;
+      letter-spacing: 0.03em;
+    }
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 6px;
+    }
+    nav ul li a {
+      color: rgba(255,255,255,0.75);
+      text-decoration: none;
+      font-size: 13px;
+      padding: 6px 12px;
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+    nav ul li a:hover {
+      color: white;
       background: rgba(255,255,255,0.15);
+    }
+    nav ul li a.active {
+      color: white;
+      background: rgba(255,255,255,0.2);
+    }
+
+    /* 每个section占满一屏 */
+    section {
+      min-height: 100vh;
+      padding: 80px 0 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    /* Section 1: Hero */
+    #hero {
+      background: linear-gradient(135deg, #1a3a5c 0%, #0d2340 100%);
+      color: white;
+      text-align: center;
+      padding: 0;
+      justify-content: center;
+      align-items: center;
+    }
+    #hero h1 {
+      font-size: 42px;
+      font-weight: bold;
+      line-height: 1.2;
+      margin-bottom: 20px;
+      max-width: 700px;
+    }
+    #hero p {
+      font-size: 16px;
+      opacity: 0.8;
+      max-width: 560px;
+      line-height: 1.7;
+      margin-bottom: 36px;
+    }
+    #hero .key-numbers {
+      display: flex;
+      gap: 32px;
+      margin-bottom: 48px;
+    }
+    #hero .kn {
+      text-align: center;
+    }
+    #hero .kn .num {
+      font-size: 36px;
+      font-weight: bold;
+      color: #e07b39;
+    }
+    #hero .kn .label {
+      font-size: 12px;
+      opacity: 0.7;
+      margin-top: 4px;
+      max-width: 120px;
+    }
+    .scroll-hint {
+      position: absolute;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: rgba(255,255,255,0.5);
+      font-size: 12px;
+      text-align: center;
+      animation: bounce 2s infinite;
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(6px); }
+    }
+
+    /* Section 2: Introduction */
+    #intro {
+      background: #f8f8f6;
+    }
+    .section-inner {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 32px;
+      width: 100%;
+    }
+    .step-tag {
+      display: inline-block;
+      background: #e07b39;
+      color: white;
+      font-size: 11px;
+      font-weight: bold;
       padding: 3px 10px;
       border-radius: 4px;
+      letter-spacing: 0.05em;
+      margin-bottom: 14px;
     }
-
-    #map-container {
-      position: relative;
-      height: calc(100vh - 50px);
-    }
-    #map { height: 100%; width: 100%; }
-
-    #legend {
-      position: absolute;
-      bottom: 28px;
-      left: 14px;
-      background: white;
-      padding: 13px 15px;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-      font-size: 12px;
-      z-index: 10;
-      min-width: 200px;
-    }
-    #legend h4 {
-      font-size: 12px;
-      color: #1a3a5c;
-      margin-bottom: 9px;
+    .section-title {
+      font-size: 28px;
       font-weight: bold;
+      color: #1a3a5c;
+      margin-bottom: 16px;
+      line-height: 1.3;
     }
-    .li { display: flex; align-items: center; margin-bottom: 6px; }
-    .lc { width: 20px; height: 13px; margin-right: 9px; border-radius: 2px; flex-shrink: 0; }
-    .legend-divider {
-      border: none;
-      border-top: 1px solid #eee;
-      margin: 9px 0;
+    .section-body {
+      font-size: 15px;
+      color: #555;
+      line-height: 1.8;
+      max-width: 680px;
     }
-    .legend-line {
+    .narrative-steps {
       display: flex;
-      align-items: center;
-      margin-bottom: 4px;
+      gap: 20px;
+      margin-top: 32px;
     }
-    .legend-dash {
-      width: 20px;
-      height: 3px;
-      background: #e07b39;
-      margin-right: 9px;
-      flex-shrink: 0;
-    }
-
-    #tooltip {
-      position: absolute;
-      top: 14px;
-      right: 14px;
+    .nstep {
+      flex: 1;
       background: white;
-      padding: 14px 16px;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-      font-size: 13px;
-      z-index: 10;
-      min-width: 215px;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      border-top: 3px solid #1a3a5c;
     }
-    #tooltip h4 {
-      font-size: 14px;
+    .nstep.highlight { border-top-color: #e07b39; }
+    .nstep .nlabel {
+      font-size: 11px;
+      font-weight: bold;
+      color: #e07b39;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+    }
+    .nstep h3 {
+      font-size: 15px;
       color: #1a3a5c;
       margin-bottom: 8px;
-      padding-bottom: 7px;
-      border-bottom: 1px solid #eee;
     }
-    #tooltip p { margin: 5px 0; color: #555; line-height: 1.5; }
-    #tooltip span { font-weight: 600; color: #1a3a5c; }
-    .itag {
-      display: inline-block;
-      padding: 1px 8px;
-      border-radius: 3px;
-      font-size: 11px;
-      font-weight: 600;
+    .nstep p {
+      font-size: 13px;
+      color: #666;
+      line-height: 1.6;
     }
-    .itag.inner { background: #1a3a5c; color: white; }
-    .itag.outer { background: #a8c8e8; color: #1a3a5c; }
 
-    #info-box {
-      position: absolute;
-      bottom: 28px;
-      right: 14px;
-      background: rgba(26,58,92,0.88);
-      color: white;
-      padding: 10px 14px;
-      border-radius: 8px;
-      font-size: 12px;
-      z-index: 10;
-      line-height: 1.7;
+    /* Section 3: Map */
+    #spatial {
+      background: #1a3a5c;
+      padding: 0;
     }
-    #info-box b { color: #e07b39; }
+    #spatial iframe {
+      width: 100%;
+      height: 100vh;
+      border: none;
+    }
+
+    /* Section 4: Factors */
+    #factors {
+      background: white;
+    }
+    .factor-tabs {
+      display: flex;
+      gap: 8px;
+      margin: 24px 0;
+      flex-wrap: wrap;
+    }
+    .ftab {
+      padding: 8px 16px;
+      border: 1.5px solid #1a3a5c;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+      background: white;
+      color: #1a3a5c;
+      transition: all 0.2s;
+    }
+    .ftab.active {
+      background: #1a3a5c;
+      color: white;
+    }
+    .factor-content {
+      display: none;
+      margin-top: 16px;
+    }
+    .factor-content.active {
+      display: block;
+    }
+    .placeholder-map {
+      background: #f0f4f8;
+      border: 2px dashed #c0d0e0;
+      border-radius: 10px;
+      height: 400px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #888;
+      font-size: 14px;
+    }
+
+    /* Section 5: Borough */
+    #borough {
+      background: #f8f8f6;
+    }
+    .placeholder-chart {
+      background: #f0f4f8;
+      border: 2px dashed #c0d0e0;
+      border-radius: 10px;
+      height: 350px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #888;
+      font-size: 14px;
+      margin-top: 24px;
+    }
+
+    /* Section 6: Discussion */
+    #discussion {
+      background: #1a3a5c;
+      color: white;
+    }
+    #discussion .section-title { color: white; }
+    #discussion .section-body { color: rgba(255,255,255,0.75); }
+    .conclusion-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 32px;
+    }
+    .conclusion-card {
+      background: rgba(255,255,255,0.08);
+      border-radius: 10px;
+      padding: 20px;
+      border-left: 3px solid #e07b39;
+    }
+    .conclusion-card h3 {
+      font-size: 14px;
+      color: #e07b39;
+      margin-bottom: 8px;
+    }
+    .conclusion-card p {
+      font-size: 13px;
+      color: rgba(255,255,255,0.7);
+      line-height: 1.6;
+    }
+
+    /* Footer */
+    footer {
+      background: #0d2340;
+      color: rgba(255,255,255,0.5);
+      text-align: center;
+      padding: 20px;
+      font-size: 12px;
+    }
+    footer a { color: rgba(255,255,255,0.7); }
   </style>
 </head>
 <body>
 
-<div id="page-title">
-  EV Charging in London — Spatial Distribution
-  <span>Step 1: Does inequality exist?</span>
-</div>
+<!-- 导航栏 -->
+<nav>
+  <div class="logo">EV Charging Inequality · London</div>
+  <ul>
+    <li><a href="#hero">Home</a></li>
+    <li><a href="#intro">Introduction</a></li>
+    <li><a href="#spatial">Spatial Map</a></li>
+    <li><a href="#factors">Explore Factors</a></li>
+    <li><a href="#borough">Borough Analysis</a></li>
+    <li><a href="#discussion">Discussion</a></li>
+  </ul>
+</nav>
 
-<div id="map-container">
-  <div id="map"></div>
-
-  <div id="legend">
-    <h4>Chargers per 10,000 residents</h4>
-    <div class="li"><div class="lc" style="background:#f7fbff;border:1px solid #ddd"></div> 0</div>
-    <div class="li"><div class="lc" style="background:#c6dbef"></div> 1 – 5</div>
-    <div class="li"><div class="lc" style="background:#6baed6"></div> 5 – 15</div>
-    <div class="li"><div class="lc" style="background:#2171b5"></div> 15 – 40</div>
-    <div class="li"><div class="lc" style="background:#08306b"></div> 40+</div>
-    <hr class="legend-divider">
-    <div class="legend-line">
-      <div class="legend-dash"></div>
-      <span style="color:#444">Inner London boundary</span>
+<!-- Section 1: Hero -->
+<section id="hero">
+  <h1>The Uneven Geography of EV Charging in London</h1>
+  <p>
+    As electric vehicle adoption accelerates across the UK, access to public
+    charging infrastructure remains deeply unequal. This project explores the
+    spatial and policy drivers behind London's EV charging divide.
+  </p>
+  <div class="key-numbers">
+    <div class="kn">
+      <div class="num">12,219</div>
+      <div class="label">Public chargers across London</div>
+    </div>
+    <div class="kn">
+      <div class="num">42.2%</div>
+      <div class="label">of LSOAs have no charger</div>
+    </div>
+    <div class="kn">
+      <div class="num">69×</div>
+      <div class="label">Gap between highest and lowest borough</div>
     </div>
   </div>
+  <div class="scroll-hint">↓ Scroll to explore</div>
+</section>
 
-  <div id="info-box">
-    <b>Inner London</b>: 14 boroughs<br>
-    <b>Outer London</b>: 19 boroughs<br>
-    Hover over any area for details
-  </div>
-
-  <div id="tooltip">
-    <h4>Hover over an area</h4>
-    <p style="color:#999;font-size:12px">
-      Move your mouse over the map<br>to explore LSOA-level data
+<!-- Section 2: Introduction -->
+<section id="intro">
+  <div class="section-inner">
+    <div class="step-tag">INTRODUCTION</div>
+    <h2 class="section-title">
+      Why does EV charging inequality matter?
+    </h2>
+    <p class="section-body">
+      The UK government has committed to phasing out new petrol and diesel cars by 2035.
+      But the success of this transition depends critically on equitable access to charging
+      infrastructure. If public chargers are concentrated in wealthier or more central areas,
+      the green transition risks deepening existing urban inequalities.
+      <br><br>
+      This project investigates three key questions: Where are London's public chargers
+      located? What factors explain their uneven distribution? And does borough-level
+      policy play a stronger role than socioeconomic deprivation?
     </p>
+
+    <div class="narrative-steps">
+      <div class="nstep">
+        <div class="nlabel">STEP A</div>
+        <h3>Spatial inequality exists</h3>
+        <p>Charger density varies dramatically across London's 4,994 LSOAs, with a clear
+        inner–outer divide.</p>
+      </div>
+      <div class="nstep">
+        <div class="nlabel">STEP B</div>
+        <h3>Deprivation alone doesn't explain it</h3>
+        <p>IMD and car ownership partially correlate with access, but leave much of the
+        variation unexplained.</p>
+      </div>
+      <div class="nstep highlight">
+        <div class="nlabel">STEP C</div>
+        <h3>Borough policy is the stronger driver</h3>
+        <p>After controlling for demand-side factors, borough-level differences emerge as
+        the key explanatory variable.</p>
+      </div>
+    </div>
   </div>
-</div>
+</section>
+
+<!-- Section 3: Spatial Map -->
+<section id="spatial">
+  <iframe src="map.html" title="EV Charging Spatial Distribution"></iframe>
+</section>
+
+<!-- Section 4: Explore Factors -->
+<section id="factors">
+  <div style="width:100%;padding:32px 24px">
+    <div class="step-tag">STEP B — EXPLORE FACTORS</div>
+    <h2 class="section-title">What explains the distribution?</h2>
+    <p class="section-body">
+      We examine several demand- and supply-side factors that may explain variation
+      in EV charger density across London's neighbourhoods.
+    </p>
+
+    <div class="factor-tabs">
+      <button class="ftab active" onclick="showFactor('imd')">Deprivation (IMD)</button>
+      <button class="ftab" onclick="showFactor('car')">Car Ownership</button>
+      <button class="ftab" onclick="showFactor('occupation')">Occupation</button>
+      <button class="ftab" onclick="showFactor('housing')">Housing Type</button>
+    </div>
+
+    <div id="factor-imd" class="factor-content active">
+      <div class="placeholder-map">[ IMD vs Charger Density chart — coming soon ]</div>
+    </div>
+    <div id="factor-car" class="factor-content">
+      <div class="placeholder-map">[ Car Ownership analysis — coming soon ]</div>
+    </div>
+    <div id="factor-occupation" class="factor-content">
+  <iframe src="occupation.html" style="width:100%;height:85vh;border:none;border-radius:8px;margin-top:16px"></iframe>
+    </div>
+    <div id="factor-housing" class="factor-content">
+      <div class="placeholder-map">[ Housing Type analysis — coming soon ]</div>
+    </div>
+  </div>
+</section>
+
+<!-- Section 5: Borough Analysis -->
+<section id="borough">
+  <div class="section-inner">
+    <div class="step-tag">STEP C — BOROUGH POLICY</div>
+    <h2 class="section-title">Borough policy as the key driver</h2>
+    <p class="section-body">
+      After accounting for demand-side factors, borough-level variation emerges as the
+      strongest predictor of charger density. Boroughs with proactive EV infrastructure
+      policies — such as Westminster and Hammersmith & Fulham — show dramatically
+      higher provision than comparable areas in east and outer London.
+    </p>
+    <div class="placeholder-chart">[ Borough ranking chart — coming soon ]</div>
+  </div>
+</section>
+
+<!-- Section 6: Discussion -->
+<section id="discussion">
+  <div class="section-inner">
+    <div class="step-tag" style="background:rgba(255,255,255,0.2)">DISCUSSION</div>
+    <h2 class="section-title">Key Findings</h2>
+    <p class="section-body">
+      Our analysis reveals that EV charging inequality in London is primarily driven by
+      geography and local policy, rather than socioeconomic deprivation alone.
+    </p>
+    <div class="conclusion-grid">
+      <div class="conclusion-card">
+        <h3>Spatial divide</h3>
+        <p>Inner London boroughs have significantly higher charger density, reflecting
+        both higher demand and stronger policy commitment from local authorities.</p>
+      </div>
+      <div class="conclusion-card">
+        <h3>Borough policy matters</h3>
+        <p>The gap between highest (Hammersmith & Fulham, 94.5/10k) and lowest
+        (Havering, 1.4/10k) boroughs is 69×, far exceeding what deprivation alone
+        can explain.</p>
+      </div>
+      <div class="conclusion-card">
+        <h3>Deprivation is a secondary factor</h3>
+        <p>While IMD correlates with charger access, its explanatory power is limited
+        once spatial and policy factors are controlled for.</p>
+      </div>
+      <div class="conclusion-card">
+        <h3>Demand side context</h3>
+        <p>Car ownership patterns and occupation type provide important context, but
+        do not fully account for the observed inequality in public charging provision.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  Data: OpenChargeMap · ONS Geography · IMD 2025 · Census 2021 &nbsp;|&nbsp;
+  CASA0029 Urban Data Visualisation · Group 13 · UCL 2026
+</footer>
 
 <script>
-  const map = new maplibregl.Map({
-    container: 'map',
-    style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
-    center: [-0.1278, 51.5074],
-    zoom: 10
-  });
-
-  map.addControl(new maplibregl.NavigationControl(), 'top-left');
-
-  map.on('load', () => {
-
-    // LSOA choropleth
-    map.addSource('lsoa', {
-      type: 'geojson',
-      data: 'data/lsoa_ev.geojson'
+  // Factor tab switching
+  function showFactor(id) {
+    document.querySelectorAll('.factor-content').forEach(el => {
+      el.classList.remove('active');
     });
+    document.querySelectorAll('.ftab').forEach(el => {
+      el.classList.remove('active');
+    });
+    document.getElementById('factor-' + id).classList.add('active');
+    event.target.classList.add('active');
+  }
 
-    map.addLayer({
-      id: 'lsoa-fill',
-      type: 'fill',
-      source: 'lsoa',
-      paint: {
-        'fill-color': [
-          'interpolate', ['linear'],
-          ['get', 'chargers_per_10k'],
-          0,   '#f7fbff',
-          5,   '#c6dbef',
-          15,  '#6baed6',
-          40,  '#2171b5',
-          100, '#08306b'
-        ],
-        'fill-opacity': 0.75
+  // Active nav highlight on scroll
+  const sections = document.querySelectorAll('section');
+  const navLinks = document.querySelectorAll('nav ul li a');
+
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(section => {
+      const top = section.offsetTop - 80;
+      if (window.scrollY >= top) current = section.getAttribute('id');
+    });
+    navLinks.forEach(link => {
+      link.classList.remove('active');
+      if (link.getAttribute('href') === '#' + current) {
+        link.classList.add('active');
       }
     });
-
-    map.addLayer({
-      id: 'lsoa-border',
-      type: 'line',
-      source: 'lsoa',
-      paint: {
-        'line-color': '#bbb',
-        'line-width': 0.3,
-        'line-opacity': 0.5
-      }
-    });
-
-    // Hover highlight
-    map.addLayer({
-      id: 'lsoa-hover',
-      type: 'fill',
-      source: 'lsoa',
-      paint: {
-        'fill-color': '#e07b39',
-        'fill-opacity': 0.45
-      },
-      filter: ['==', 'LSOA21CD', '']
-    });
-
-    // Inner London boundary
-    map.addSource('inner-boundary', {
-      type: 'geojson',
-      data: 'data/inner_london_boundary.geojson'
-    });
-
-    map.addLayer({
-      id: 'inner-outline',
-      type: 'line',
-      source: 'inner-boundary',
-      paint: {
-        'line-color': '#e07b39',
-        'line-width': 2.5,
-        'line-dasharray': [4, 2]
-      }
-    });
-
-    // Hover events
-    map.on('mousemove', 'lsoa-fill', (e) => {
-      const p = e.features[0].properties;
-      map.setFilter('lsoa-hover', ['==', 'LSOA21CD', p.LSOA21CD]);
-      map.getCanvas().style.cursor = 'pointer';
-
-      const isInner = p.inner_outer === 'Inner';
-      document.getElementById('tooltip').innerHTML = `
-        <h4>${p.LSOA21NM}</h4>
-        <p>Borough: <span>${p.borough}</span></p>
-        <p>Zone: <span class="itag ${isInner ? 'inner' : 'outer'}">${p.inner_outer} London</span></p>
-        <p>Chargers: <span>${p.charger_count}</span></p>
-        <p>Per 10k residents: <span>${parseFloat(p.chargers_per_10k).toFixed(1)}</span></p>
-        <p>IMD Decile: <span>${p.imd_decile}${p.imd_decile == 1 ? ' (most deprived)' : p.imd_decile == 10 ? ' (least deprived)' : ''}</span></p>
-        <p>Has charger: <span>${p.has_charger ? '✓ Yes' : '✗ No'}</span></p>
-      `;
-    });
-
-    map.on('mouseleave', 'lsoa-fill', () => {
-      map.setFilter('lsoa-hover', ['==', 'LSOA21CD', '']);
-      map.getCanvas().style.cursor = '';
-      document.getElementById('tooltip').innerHTML = `
-        <h4>Hover over an area</h4>
-        <p style="color:#999;font-size:12px">
-          Move your mouse over the map<br>to explore LSOA-level data
-        </p>
-      `;
-    });
-
   });
 </script>
 </body>
