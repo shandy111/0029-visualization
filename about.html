@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Methodology · EV Charging Inequality in London</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    :root {
+      --navy: #1b4332;
+      --navy-soft: #2d6a4f;
+      --deep-blue: #2d6a4f;
+      --light-blue: #dcebdd;
+      --accent: #e07b39;
+      --accent-strong: #e8752c;
+      --off-white: #faf8f3;
+      --off-white-alt: #f7f4ee;
+      --text: #222831;
+      --muted: #5f6b76;
+      --line: #e8ecef;
+      --card: #ffffff;
+      --copy-max: 1500px;
+    }
+
+    .site-nav {
+      background: rgba(27, 67, 50, 0.94);
+    }
+
+    .about-hero {
+      background: linear-gradient(135deg, #2d6a4f 0%, #1b4332 100%);
+    }
+
+    .site-footer {
+      background: #0d1f17;
+    }
+  </style>
+</head>
+<body>
+  <nav class="site-nav">
+    <a class="site-logo" href="../index.html#hero">EV Charging Inequality · London</a>
+    <ul class="site-nav-links">
+      <li><a href="../index.html#hero">Home</a></li>
+      <li><a href="../index.html#intro">Introduction</a></li>
+      <li><a href="../index.html#spatial">Map</a></li>
+      <li><a href="../index.html#coverage">Coverage Gap</a></li>
+      <li><a href="../index.html#inner-outer">Inner / Outer</a></li>
+      <li><a href="../index.html#imd-section">Deprivation</a></li>
+      <li><a href="../index.html#demand">Demand</a></li>
+      <li><a href="../index.html#borough">Borough Analysis</a></li>
+      <li><a href="../index.html#factors">Explore Factors</a></li>
+      <li><a href="../index.html#discussion">Discussion</a></li>
+      <li><a class="is-active" href="about.html">Methodology</a></li>
+    </ul>
+  </nav>
+
+  <section class="about-hero">
+    <div class="section-shell wide-shell">
+      <div class="section-kicker section-kicker-light">Methodology & data sources</div>
+      <h1 class="section-title section-title-light">How this website was built</h1>
+      <p class="section-lead section-lead-light" style="max-width:var(--copy-max);">
+        This page records both the shared project workflow and the individual methodology contributions of group members. The aim is to show
+        how the project moved from processed charging and Census data to a final web-based narrative, while also making each person's role clear.
+      </p>
+    </div>
+  </section>
+
+  <section class="content-section section-white">
+    <div class="section-shell wide-shell">
+      <div class="section-kicker">Project design</div>
+      <h2 class="section-title">Analytical logic from raw data to final story</h2>
+      <div class="about-grid">
+        <article class="about-card">
+          <h3>Research question</h3>
+          <p>
+            The project asks where London's public EV charging infrastructure is concentrated, how evenly it is distributed across neighbourhoods,
+            and how LSOA-level inequality translates into borough-level rollout differences.
+          </p>
+        </article>
+        <article class="about-card">
+          <h3>Why LSOA first</h3>
+          <p>
+            LSOAs are the main unit of spatial analysis because borough averages can hide fine-grained access gaps. We therefore begin with
+            neighbourhood-scale charger presence and density before moving upward to Inner/Outer and borough summaries.
+          </p>
+        </article>
+        <article class="about-card">
+          <h3>Interpretive framework</h3>
+          <p>
+            Deprivation, car ownership, housing type and occupation are treated as contextual indicators rather than single-variable explanations.
+            The website is designed as a data story that compares multiple dimensions of inequality instead of relying on one map alone.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="content-section section-offwhite">
+    <div class="section-shell wide-shell">
+      <div class="section-kicker">Indicator definitions</div>
+      <h2 class="section-title">Key indicators used in the website</h2>
+      <div class="about-grid">
+        <article class="about-card">
+          <h3>Chargers per 10,000 residents</h3>
+          <p>
+            A population-adjusted density indicator used across LSOA, borough and Inner/Outer London summaries.
+          </p>
+        </article>
+        <article class="about-card">
+          <h3>Zero-charger LSOA</h3>
+          <p>
+            A simple access flag showing whether a neighbourhood has no recorded public charger at all.
+          </p>
+        </article>
+        <article class="about-card">
+          <h3>Chargers per 1,000 car owning households</h3>
+          <p>
+            A demand-context indicator comparing public charging provision with the number of car-owning households.
+          </p>
+        </article>
+        <article class="about-card">
+          <h3>Percentage(%) car owning households</h3>
+          <p>
+            Derived from Census 2021 TS045. Used as a demand-context proxy rather than direct evidence of EV ownership.
+          </p>
+        </article>
+        <article class="about-card">
+          <h3>Percentage(%) flats / apartments</h3>
+          <p>
+            Derived from Census 2021 TS044. Used as a proxy for potential home-charging constraints rather than direct evidence of parking conditions.
+          </p>
+        </article>
+        <article class="about-card">
+          <h3>IMD Decile</h3>
+          <p>
+            Allows the analysis to compare public EV charging provision across more deprived and less deprived LSOAs.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="content-section section-white">
+    <div class="section-shell wide-shell">
+      <div class="section-kicker">Team contributions</div>
+      <h2 class="section-title">Individual methodology contributions</h2>
+      <div class="about-grid">
+        <article class="about-card">
+          <h3>Member 1: methodology to be added</h3>
+          <p>
+            Placeholder for the first group member’s contribution. This section can be replaced with a short methods summary covering their
+            actual data processing, analytical decisions and visualisation or front-end work.
+          </p>
+        </article>
+        <article class="about-card">
+          <h3>Member 2: methodology to be added</h3>
+          <p>
+            Placeholder for the second group member’s contribution. This section can be replaced with a short methods summary covering their
+            actual data processing, analytical decisions and visualisation or front-end work.
+          </p>
+        </article>
+        <article class="about-card">
+          <h3>Member 3: borough and contextual comparison workflow</h3>
+          <p>
+            My contribution focused on connecting processed spatial and socio-economic data to the final web-based visualisation of EV charging
+            inequality in London. I worked mainly on the borough-level and contextual comparison components, and on integrating these outputs
+            into the project website.
+          </p>
+          <p>
+            I started from the existing <code>lsoa_ev.geojson</code> dataset rather than rebuilding the full charger geography from scratch. In
+            <code>process_demand_indicators.py</code>, I cleaned Census 2021 TS045 and TS044 tables, standardised category fields, converted counts
+            into comparable indicators, and merged them into <code>lsoa_ev_plus_demand.geojson</code>. I then used <code>process_borough_summary.py</code>
+            to validate borough summary fields, derive indicators such as <code>pct_no_charger</code>, and generate London-wide metrics and chart-ready
+            borough outputs. To extend borough context, I used <code>process_ts044_context.py</code> to aggregate car ownership and housing
+            indicators at borough level. On the front end, I integrated these outputs into the homepage and methodology page, adjusted layout,
+            navigation and copy width, and refined Chart.js interactions so the borough and comparison sections were clearer and more consistent.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="content-section section-offwhite">
+    <div class="section-shell wide-shell">
+      <div class="section-kicker">Web production</div>
+      <h2 class="section-title">How processed data became the final website</h2>
+      <div class="about-grid">
+        <article class="about-card">
+          <h3>Interactive map layer</h3>
+          <p>
+            <code>map.html</code> serves as the main spatial entry point. It uses the processed LSOA GeoJSON to show neighbourhood-scale inequality,
+            allowing the website to open with a strong geographical overview before moving into chart-based interpretation.
+          </p>
+        </article>
+        <article class="about-card">
+          <h3>Comparative chart layer</h3>
+          <p>
+            Chart.js is used to build comparison charts including IMD summaries, Inner/Outer London comparisons, borough demand scatter plots,
+            housing context views and borough ranking charts. These chart sections read processed CSV outputs directly in the browser.
+          </p>
+        </article>
+        <article class="about-card">
+          <h3>Narrative page assembly</h3>
+          <p>
+            The homepage was assembled as a single scrollytelling-style page that moves from map, to coverage gap, to Inner/Outer comparison,
+            to deprivation, demand, housing, borough analysis and final discussion. The methodology page documents this pipeline so the website
+            can be read both as a visual story and as a reproducible analytical project.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="content-section section-offwhite">
+    <div class="section-shell wide-shell">
+      <div class="section-kicker">Data sources</div>
+      <h2 class="section-title">Data sources table</h2>
+      <div class="table-card">
+        <table>
+          <thead>
+            <tr>
+              <th>Source</th>
+              <th>Role in project</th>
+              <th>Use in visualisations</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>OpenChargeMap API</td>
+              <td>Public charger point locations</td>
+              <td>Core charger presence and density indicators</td>
+            </tr>
+            <tr>
+              <td>ONS LSOA 2021 boundaries</td>
+              <td>Spatial framework and spatial join</td>
+              <td>Main map and LSOA-level analysis</td>
+            </tr>
+            <tr>
+              <td>ONS LSOA population estimates</td>
+              <td>Population denominator</td>
+              <td>Chargers per 10,000 residents</td>
+            </tr>
+            <tr>
+              <td>IMD 2025 File 7</td>
+              <td>Deprivation indicator</td>
+              <td>IMD decile summaries and contextual analysis</td>
+            </tr>
+            <tr>
+              <td>Census 2021 TS045</td>
+              <td>Car or van availability / demand-context proxy</td>
+              <td>Car ownership demand context indicators</td>
+            </tr>
+            <tr>
+              <td>Census 2021 TS044</td>
+              <td>Accommodation type / home-charging constraint proxy</td>
+              <td>Housing form and charging constraint context</td>
+            </tr>
+            <tr>
+              <td>DfT EVCI</td>
+              <td>Official borough or local authority benchmark</td>
+              <td>Contextual benchmark source for borough-level discussion</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="content-section section-white">
+    <div class="section-shell wide-shell">
+      <div class="section-kicker">Limitations</div>
+      <h2 class="section-title">Key limitations</h2>
+      <div class="about-card">
+        <ul class="list-clean">
+          <li>OpenChargeMap is an open and partly crowdsourced proxy source, so charger coverage may be incomplete.</li>
+          <li>The project analyses public chargers, not private chargers.</li>
+          <li>Car ownership is not EV ownership.</li>
+          <li>Housing type is not direct evidence of parking availability.</li>
+          <li>LSOA aggregation can still hide very local variation within neighbourhoods.</li>
+          <li>Borough-level rollout patterns are observed, but policy causality is not proven.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="content-section section-offwhite">
+    <div class="section-shell wide-shell">
+      <div class="section-kicker">References</div>
+      <h2 class="section-title">References and source notes</h2>
+      <div class="about-card">
+        <ul class="list-clean">
+          <li>OpenChargeMap API, used for public EV charging point locations.</li>
+          <li>ONS LSOA boundaries and population data, used for neighbourhood geography and population-normalised indicators.</li>
+          <li>English Indices of Deprivation (IMD), used for deprivation context at LSOA level.</li>
+          <li>Census 2021 TS045 (Car or Van Availability), used as a demand-context proxy.</li>
+          <li>Census 2021 TS044 (Accommodation Type), used as a proxy for home-charging constraint context.</li>
+          <li>Additional project scripts and processed outputs are documented within the project folder for reproducibility.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="section-shell wide-shell footer-shell">
+      <div>CASA0029 Urban Data Visualisation · Methodology, data sources and limitations.</div>
+      <div><a href="../index.html">Return to the main website</a></div>
+    </div>
+  </footer>
+</body>
+</html>
