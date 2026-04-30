@@ -110,7 +110,6 @@ code {
 }
 
 .section-dark {
-  background: var(--navy-soft);
   color: #ffffff;
 }
 
@@ -599,19 +598,16 @@ tbody td {
 
 #discussion {
   position: relative;
-  background: url("../image/last.png") center center / cover no-repeat;
+  background: url("../image/last.png") center center / cover no-repeat !important;
   overflow: hidden;
 }
 
-#discussion {
-  position: relative;
-  background-image:
-    linear-gradient(rgba(10, 42, 34, 0.72), rgba(10, 42, 34, 0.72)),
-    url("../image/last.png?v=2");
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  overflow: hidden;
+#discussion::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(8, 32, 26, 0.82);
+  z-index: 0;
 }
 
 #discussion > * {
