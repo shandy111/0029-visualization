@@ -180,20 +180,29 @@ The PTAL module uses the Choropleth map of sequential colour matching to express
         </article>
         <!-- Member 3  -->
         <article class="about-card">
-          <h3>Yu Shi: borough and contextual comparison workflow</h3>
+          <h3>Yu Shi: Borough and contextual comparison workflow</h3>
           <p>
-            My contribution focused on connecting processed spatial and socio-economic data to the final web-based visualisation of EV charging
-            inequality in London. I worked mainly on the borough-level and contextual comparison components, and on integrating these outputs
-            into the project website.
+            My contribution focused on extending the project from a mainly descriptive analysis of EV charger distribution to a more contextual spatial equity analysis. I worked mainly on the demand-context, housing-context, borough-level comparison and final website integration components.
           </p>
+
           <p>
-            I started from the existing <code>lsoa_ev.geojson</code> dataset rather than rebuilding the full charger geography from scratch. In
-            <code>process_demand_indicators.py</code>, I cleaned Census 2021 TS045 and TS044 tables, standardised category fields, converted counts
-            into comparable indicators, and merged them into <code>lsoa_ev_plus_demand.geojson</code>. I then used <code>process_borough_summary.py</code>
-            to validate borough summary fields, derive indicators such as <code>pct_no_charger</code>, and generate London-wide metrics and chart-ready
-            borough outputs. To extend borough context, I used <code>process_ts044_context.py</code> to aggregate car ownership and housing
-            indicators at borough level. On the front end, I integrated these outputs into the homepage and methodology page, adjusted layout,
-            navigation and copy width, and refined Chart.js interactions so the borough and comparison sections were clearer and more consistent.
+            Instead of rebuilding the original charger geography from scratch, I used the existing <code>lsoa_ev.geojson</code> file as the baseline LSOA-level EV dataset. This dataset already contained the core charger, population, IMD, borough and Inner/Outer London fields. My role was to extend this baseline with additional Census-based indicators and prepare outputs for the final website narrative.
+          </p>
+
+          <P>
+            I processed Census 2021 TS045 car or van availability data to derive car ownership indicators, including total households, households without a car or van, car-owning households, and the percentage of car-owning households. These indicators were used as demand-context proxies rather than as direct measures of EV ownership. I also processed Census 2021 TS044 accommodation type data to derive housing structure indicators, especially the percentage of flats and apartments. This was used as a proxy for potential home-charging constraints, rather than as direct evidence of private parking availability.
+          </P>
+
+          <p>
+            Then I cleaned and standardised the Census categories, converted counts into comparable indicators, and merged the results into the existing LSOA EV dataset using <code>process_demand_indicators.py</code> producing <code>lsoa_ev_plus_demand.geojson</code>. I also created summary outputs including <code>inner_outer_summary.csv</code> and <code>borough_demand_summary.csv</code>, which support the Inner/Outer London comparison, coverage gap analysis, demand-context charts and borough-level ranking.
+          </p>
+
+          <p>
+            At the borough level, I worked on validating and extending borough summary indicators, including charger density, the percentage of LSOAs without chargers, and the car ownership and housing context using  <code>process_ts045_ts044_context.py</code>. The outputs were used to support the borough ranking and summary cards on the website. 
+          </p>
+
+          <p>
+            On the front end, I integrated these processed outputs into the final homepage narrative. This involved connecting the data outputs to Chart.js visualisations, refining the homepage layout, adjusting the navigation, improving the section structure, adding source notes and captions, and making the wording more consistent across the map, coverage, Inner/Outer, IMD, demand, housing, and borough sections. I also helped prepare the About page so that the project could be understood as both a visual and a reproducible data-processing workflow.
           </p>
         </article>
       </div>
