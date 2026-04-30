@@ -86,15 +86,34 @@
     }
 
     #hero {
-      background: linear-gradient(150deg, #1b4332 0%, #2d6a4f 50%, #40916c 100%);
-      color: white;
-      padding: 0;
-      justify-content: center;
-      align-items: stretch;
-      text-align: left;
-      position: relative;
-      min-height: calc(100vh - 64px);
-    }
+  background-image: url("image/background.jpg");
+  background-position: center center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  color: white;
+  padding: 0;
+  justify-content: center;
+  align-items: stretch;
+  text-align: left;
+  position: relative;
+  min-height: calc(100vh - 64px);
+  overflow: hidden;
+}
+#hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(13, 35, 25, 0.72) 0%,
+    rgba(27, 67, 50, 0.55) 100%
+  );
+  z-index: 0;
+}
+#hero > * {
+  position: relative;
+  z-index: 1;
+}
     #hero .hero-shell {
       width: min(1440px, calc(100% - 32px));
       padding: 110px 0 92px;
@@ -426,39 +445,86 @@
     #borough { background: var(--bg-card); }
     #borough .section-inner { max-width: 1240px; }
 
-    /*Discussion*/
-    #discussion {
-      background: var(--primary-dark);
-      color: white;
-    }
-    #discussion .section-title { color: white; }
-    #discussion .section-body { color: rgba(255,255,255,0.72); }
-    .conclusion-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 18px;
-      margin-top: 36px;
-      align-items: stretch;
-    }
-    .conclusion-card {
-      background: rgba(255,255,255,0.07);
-      border-radius: 10px;
-      padding: 22px;
-      border-left: 3px solid var(--primary-light);
-      min-height: 182px;
-      display: flex;
-      flex-direction: column;
-    }
-    .conclusion-card h3 {
-      font-size: 14px;
-      color: var(--primary-light);
-      margin-bottom: 9px;
-    }
-    .conclusion-card p {
-      font-size: 13px;
-      color: rgba(255,255,255,0.68);
-      line-height: 1.65;
-    }
+    /* Discussion */
+#discussion {
+  position: relative;
+  background-image: url("image/last.png");
+  background-position: center center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  color: white;
+  overflow: hidden;
+}
+#discussion::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(8, 32, 26, 0.72) 0%,
+    rgba(8, 32, 26, 0.55) 45%,
+    rgba(8, 32, 26, 0.62) 100%
+  );
+  z-index: 0;
+}
+#discussion > * {
+  position: relative;
+  z-index: 1;
+}
+#discussion .section-title { color: white; }
+#discussion .section-body { color: rgba(255,255,255,0.85); }
+
+.conclusion-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-top: 36px;
+  align-items: stretch;
+}
+
+/* 毛玻璃卡片 */
+.conclusion-card {
+  background: linear-gradient(
+    145deg,
+    rgba(20, 50, 42, 0.42) 0%,
+    rgba(15, 40, 34, 0.36) 50%,
+    rgba(40, 90, 70, 0.40) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.20);
+  border-left: 3px solid var(--primary-light);
+  border-radius: 14px;
+  padding: 24px 26px;
+  min-height: 182px;
+  display: flex;
+  flex-direction: column;
+  box-shadow:
+    0 8px 28px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(10px) saturate(1.2);
+  -webkit-backdrop-filter: blur(10px) saturate(1.2);
+  transition: all 0.3s ease;
+}
+.conclusion-card:hover {
+  border-color: rgba(180, 240, 210, 0.45);
+  transform: translateY(-2px);
+  box-shadow:
+    0 12px 36px rgba(0, 0, 0, 0.32),
+    0 0 24px rgba(120, 220, 180, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+.conclusion-card h3 {
+  font-size: 15px;
+  color: #ffffff;
+  font-weight: 700;
+  margin-bottom: 12px;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+}
+.conclusion-card p {
+  font-size: 13.5px;
+  color: rgba(255, 255, 255, 0.92);
+  line-height: 1.7;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.7);
+}
 
     footer.site-footer {
       background: #0d1f17;
