@@ -171,10 +171,9 @@
     #intro { background: var(--bg); padding: 72px 0 80px; }
 
     .section-inner {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 48px;
-      width: 100%;
+         width: min(1240px, calc(100% - 48px));
+         margin: 0 auto;
+         padding: 0;
     }
     .step-tag {
       display: inline-block;
@@ -578,25 +577,34 @@
 
 <!-- Introduction -->
 <section id="intro" class="content-section section-offwhite">
-  <div class="section-shell narrow-shell">
+  <div class="section-shell wide-shell">
     <div class="section-kicker">Introduction</div>
     <h2 class="section-title">Why focus on public EV charging equity?</h2>
-    <p class="section-lead">
-      London’s low-carbon transition depends on charging infrastructure being available across the city, not only in a few well-served areas. Public charging is especially important where residents may have limited access to private off-street charging.
-    </p>
-    <div class="insight-grid">
-      <article class="insight-card">
-        <h3>Spatial structure matters</h3>
-        <p>Neighbourhood-level coverage can look very different from borough averages, especially where zero-charger LSOAs remain common.</p>
-      </article>
-      <article class="insight-card">
-        <h3>Demand context matters</h3>
-        <p>Car ownership is used as a demand-context proxy, not as a direct measure of EV ownership.</p>
-      </article>
-      <article class="insight-card">
-        <h3>Home-charging constraints matter</h3>
-        <p>Housing type is used as a proxy for home-charging constraints, rather than direct evidence of private parking access.</p>
-      </article>
+    <p class="section-body">
+  London’s low-carbon mobility transition depends not only on increasing the number of public EV chargers, but also on ensuring that charging infrastructure is fairly distributed across neighbourhoods. Previous research frames EV charging provision as a social equity issue, because uneven access may affect who can benefit from the transition to electric mobility (Hopkins et al., 2023). This is especially important in London, where many residents lack access to private off-street parking or home charging and may therefore rely more heavily on public or on-street charging facilities (Zhang et al., 2024; Budnitz et al., 2024).
+</p>
+
+<div class="insight-grid intro-insight-grid">
+  <article class="insight-card">
+    <h3>Charging equity matters</h3>
+    <p>Public EV charging is not only a transport infrastructure issue, but also an urban equity issue because uneven provision can limit who benefits from electric mobility (Hopkins et al., 2023).</p>
+  </article>
+
+  <article class="insight-card">
+    <h3>Home-charging constraints matter</h3>
+    <p>Residents without private driveways, garages, or off-street parking may face greater barriers to EV adoption and rely more on local public charging (Budnitz et al., 2024).</p>
+  </article>
+
+  <article class="insight-card">
+    <h3>London is a relevant case</h3>
+    <p>London combines ambitious low-emission transport policies with uneven neighbourhood conditions, making it a useful case for examining public EV charging accessibility (Zhang et al., 2024).</p>
+  </article>
+
+  <article class="insight-card">
+    <h3>Neighbourhood scale matters</h3>
+    <p>LSOA-level analysis helps reveal local charging gaps that may be hidden by broader borough-level averages or city-wide charger totals (Zhang et al., 2024).</p>
+  </article>
+</div>
     </div>
   </div>
 </section>
