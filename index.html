@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
-  <!-- update -->
-<!DOCTYPE html>
-<html>
 <head>
   <meta charset="UTF-8">
   <title>EV Charging Inequality in London</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     
@@ -17,65 +16,52 @@
       background: #faf8f3;
     }
 
+    /*Central design tokens used by homepage.
+      Keeping colours / widths here makes it easier for teammates to tunethe look of the whole page.
+    */
     :root {
+      --navy: #1b4332;
+      --navy-soft: #2d6a4f;
+      --deep-blue: #2d6a4f;
+      --light-blue: #dcebdd;
       --primary: #2d6a4f;
       --primary-dark: #1b4332;
       --primary-light: #74c69d;
       --accent: #e07b39;
+      --accent-strong: #e8752c;
       --bg: #faf8f3;
       --bg-card: #ffffff;
+      --off-white: #faf8f3;
+      --off-white-alt: #f7f4ee;
       --text-main: #2c2c2a;
+      --text: #222831;
       --text-sub: #5a5a58;
+      --muted: #5f6b76;
+      --line: #e8ecef;
+      --card: #ffffff;
+      /* Shared readable width for long explanatory text blocks */
+      --copy-max: 1500px;
     }
 
-    /* 导航栏 */
-    nav {
-      position: fixed;
-      top: 0;
-      width: 100%;
-      background: #faf8f3;
-      border-bottom: 2px solid #e8e4da;
-      z-index: 1000;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0 48px;
-      height: 64px;
+    /* Top navigation */
+    nav.site-nav {
+      background: rgba(27, 67, 50, 0.94);
+      backdrop-filter: blur(8px);
+      padding: 14px 28px;
+      height: auto;
     }
-    nav .logo {
-      color: var(--primary-dark);
-      font-size: 16px;
-      font-weight: bold;
-      letter-spacing: 0.02em;
+    nav.site-nav .site-logo {
+      color: #ffffff;
     }
-    nav .logo span {
-      color: var(--primary);
-      font-weight: normal;
-      font-size: 13px;
-      margin-left: 8px;
+    nav.site-nav .site-nav-links a {
+      color: rgba(255, 255, 255, 0.82);
     }
-    nav ul {
-      list-style: none;
-      display: flex;
-      gap: 4px;
-    }
-    nav ul li a {
-      color: var(--text-sub);
-      text-decoration: none;
-      font-size: 13px;
-      padding: 8px 14px;
-      border-radius: 6px;
-      transition: all 0.2s;
-      font-weight: 500;
-    }
-    nav ul li a:hover {
-      color: var(--primary);
-      background: #edf5f0;
-    }
-    nav ul li a.active {
-      color: var(--primary);
-      background: #edf5f0;
-      font-weight: bold;
+    nav.site-nav .site-nav-links a:hover,
+    nav.site-nav .site-nav-links a.active,
+    nav.site-nav .site-nav-links a.is-active {
+      background: rgba(255, 255, 255, 0.14);
+      color: #ffffff;
+      font-weight: 700;
     }
 
     section {
@@ -86,35 +72,74 @@
       justify-content: center;
     }
 
-    /* Section 1: Hero */
+    .content-section {
+      min-height: auto;
+      padding: 80px 0;
+    }
+
+    .wide-shell {
+      width: min(1440px, calc(100% - 24px));
+    }
+
+    .narrow-shell {
+      width: min(1240px, calc(100% - 28px));
+    }
+
     #hero {
       background: linear-gradient(150deg, #1b4332 0%, #2d6a4f 50%, #40916c 100%);
       color: white;
       padding: 0;
       justify-content: center;
-      align-items: center;
-      text-align: center;
+      align-items: stretch;
+      text-align: left;
       position: relative;
+      min-height: calc(100vh - 64px);
+    }
+    #hero .hero-shell {
+      width: min(1440px, calc(100% - 32px));
+      padding: 110px 0 92px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
     }
     #hero h1 {
-      font-size: 40px;
-      font-weight: bold;
-      line-height: 1.25;
-      margin-bottom: 20px;
-      max-width: 700px;
+      font-size: clamp(56px, 6vw, 72px);
+      font-weight: 700;
+      line-height: 1.05;
+      margin-bottom: 22px;
+      max-width: 1200px;
     }
     #hero p {
-      font-size: 16px;
-      opacity: 0.82;
-      max-width: 540px;
-      line-height: 1.75;
-      margin-bottom: 40px;
+      font-size: 19px;
+      opacity: 0.9;
+      max-width: var(--copy-max);
+      line-height: 1.8;
+      margin-bottom: 34px;
     }
     #hero .key-numbers {
-      display: flex;
-      gap: 48px;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 18px;
       margin-bottom: 52px;
+      width: 100%;
+      align-items: stretch;
     }
+    #hero .key-numbers .metric-card {
+      height: 100%;
+      min-height: 168px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      text-align: left;
+      padding: 24px;
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid rgba(255, 255, 255, 0.26);
+      box-shadow: 0 12px 28px rgba(17, 34, 51, 0.14);
+    }
+    #hero .metric-label { color: #5f6b76; }
+    #hero .metric-value { color: #1b4332; font-size: 38px; }
+    #hero .metric-value.accent { color: #e8752c; }
+    #hero .metric-meta { color: #5f6b76; }
     #hero .kn { text-align: center; }
     #hero .kn .num {
       font-size: 40px;
@@ -142,11 +167,11 @@
       50%       { transform: translateX(-50%) translateY(7px); }
     }
 
-    /* Section 2: Intro */
-    #intro { background: var(--bg); }
+    /* Introduction */
+    #intro { background: var(--bg); padding: 72px 0 80px; }
 
     .section-inner {
-      max-width: 920px;
+      max-width: 1200px;
       margin: 0 auto;
       padding: 0 48px;
       width: 100%;
@@ -175,7 +200,19 @@
       font-size: 15px;
       color: var(--text-sub);
       line-height: 1.85;
-      max-width: 680px;
+      max-width: var(--copy-max);
+    }
+    .section-lead,
+    .section-lead-light {
+      max-width: var(--copy-max);
+    }
+    .wide-shell .section-lead,
+    .wide-shell .section-lead-light {
+      max-width: var(--copy-max);
+    }
+    .narrow-shell .section-lead,
+    .narrow-shell .section-lead-light {
+      max-width: var(--copy-max);
     }
     .narrative-steps {
       display: flex;
@@ -209,37 +246,121 @@
       line-height: 1.65;
     }
 
-    /* Section 3: Map */
+    /* Map*/
     #spatial {
       background: #e8e4da;
-      padding: 88px 60px 60px;
-      min-height: 100vh;
+      padding: 36px 0 24px;
+      min-height: auto;
       display: flex;
       align-items: center;
       justify-content: center;
+    }
+    #spatial .section-shell {
+      width: min(1320px, calc(100% - 24px)) !important;
     }
     #spatial iframe {
       width: 100%;
-      height: 82vh;
+      height: 90vh;
       border: none;
-      border-radius: 14px;
-      box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+      border-radius: 8px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.14);
     }
 
-    /* Section 4: IMD */
+    /* IMD*/
     #imd-section { background: var(--bg-card); }
+    #imd-section .section-inner { max-width: 1240px; }
 
-    .placeholder-map {
-      background: #f5f3ee;
-      border: 2px dashed #c8c4b8;
-      border-radius: 10px;
-      height: 420px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #999;
-      font-size: 14px;
+    .chart-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 28px;
       margin-top: 28px;
+      align-items: stretch;
+    }
+    .chart-panel {
+      background: #ffffff;
+      border-radius: 18px;
+      padding: 22px 24px 18px;
+      box-shadow: 0 10px 24px rgba(17,34,51,0.08);
+      border: 1px solid #e8ecef;
+    }
+    .chart-panel h3 {
+      font-size: 16px;
+      color: var(--primary-dark);
+      margin-bottom: 8px;
+    }
+    .chart-panel p {
+      font-size: 13px;
+      color: #6b6b69;
+      line-height: 1.65;
+      margin-top: 10px;
+    }
+    .chart-wrap {
+      position: relative;
+      width: 100%;
+      height: 470px;
+    }
+    .chart-wrap-tall {
+      position: relative;
+      width: 100%;
+      height: 980px;
+    }
+    .chart-wrap-short {
+      position: relative;
+      width: 100%;
+      height: 440px;
+    }
+    .source-note {
+      font-size: 12px;
+      color: #72726f;
+      margin-top: 16px;
+      line-height: 1.6;
+      max-width: var(--copy-max);
+    }
+    .caption-note {
+      font-size: 13px;
+      color: var(--text-sub);
+      margin-top: 10px;
+      line-height: 1.7;
+      max-width: var(--copy-max);
+    }
+    .mini-card-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 18px;
+      margin-top: 24px;
+    }
+    .inner-outer-card-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+      margin-top: 24px;
+    }
+    .mini-card {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 18px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+      border-top: 3px solid var(--primary-light);
+    }
+    .mini-card h4 {
+      font-size: 12px;
+      color: var(--text-sub);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .mini-card .mini-value {
+      font-size: 28px;
+      font-weight: bold;
+      color: var(--primary-dark);
+      line-height: 1.15;
+    }
+    .mini-card .mini-sub {
+      font-size: 13px;
+      color: #6b6b69;
+      margin-top: 8px;
+      line-height: 1.6;
     }
 
     /* Section 5: Factors */
@@ -249,7 +370,9 @@
       padding: 88px 60px 60px;
     }
     .factors-inner {
-      max-width: 100%;
+      max-width: 1240px;
+      width: 100%;
+      margin: 0 auto;
     }
     .factor-tabs {
       display: flex;
@@ -276,23 +399,35 @@
     .factor-content { display: none; }
     .factor-content.active { display: block; }
 
-    /* Section 6: Borough */
-    #borough { background: var(--bg-card); }
-
-    .placeholder-chart {
-      background: #f5f3ee;
-      border: 2px dashed #c8c4b8;
-      border-radius: 10px;
-      height: 380px;
+    /* Button filtering for the demand scatter plot */
+    .chart-filter-bar {
       display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #999;
-      font-size: 14px;
-      margin-top: 28px;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 0 0 16px;
+    }
+    .chart-filter-btn {
+      border: 1px solid var(--primary);
+      background: #ffffff;
+      color: var(--primary-dark);
+      border-radius: 999px;
+      padding: 9px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .chart-filter-btn:hover,
+    .chart-filter-btn.active {
+      background: var(--primary);
+      color: #ffffff;
     }
 
-    /* Section 7: Discussion */
+    /* Section 6: Borough */
+    #borough { background: var(--bg-card); }
+    #borough .section-inner { max-width: 1240px; }
+
+    /*Discussion*/
     #discussion {
       background: var(--primary-dark);
       color: white;
@@ -304,12 +439,16 @@
       grid-template-columns: 1fr 1fr;
       gap: 18px;
       margin-top: 36px;
+      align-items: stretch;
     }
     .conclusion-card {
       background: rgba(255,255,255,0.07);
       border-radius: 10px;
       padding: 22px;
       border-left: 3px solid var(--primary-light);
+      min-height: 182px;
+      display: flex;
+      flex-direction: column;
     }
     .conclusion-card h3 {
       font-size: 14px;
@@ -322,140 +461,301 @@
       line-height: 1.65;
     }
 
-    footer {
+    footer.site-footer {
       background: #0d1f17;
-      color: rgba(255,255,255,0.4);
-      text-align: center;
-      padding: 22px;
-      font-size: 12px;
     }
-    footer a { color: rgba(255,255,255,0.65); }
+    footer.site-footer .footer-shell {
+      color: rgba(255,255,255,0.72);
+    }
+    footer.site-footer a { color: rgba(255,255,255,0.88); }
+
+    @media (max-width: 900px) {
+      .chart-grid {
+        grid-template-columns: 1fr;
+      }
+      .mini-card-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+      .inner-outer-card-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+      #hero .key-numbers {
+        grid-template-columns: 1fr 1fr;
+      }
+      .chart-wrap {
+        height: 400px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .mini-card-grid {
+        grid-template-columns: 1fr;
+      }
+      .inner-outer-card-grid {
+        grid-template-columns: 1fr;
+      }
+      #hero .key-numbers {
+        grid-template-columns: 1fr;
+      }
+      #hero .hero-shell {
+        width: min(100%, calc(100% - 32px));
+        padding: 92px 0 78px;
+      }
+      #hero h1 {
+        font-size: 48px;
+      }
+      #hero p {
+        font-size: 17px;
+      }
+    }
+
+    @media (max-width: 820px) {
+      #spatial iframe {
+        height: 82vh;
+      }
+      .conclusion-grid {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
 <body>
 
-<!-- 导航栏 -->
-<nav>
-  <div class="logo">
-    EV Charging Inequality
-    <span>· London</span>
-  </div>
-  <ul>
+<!-- Top navigation -->
+<nav class="site-nav">
+  <a class="site-logo" href="#hero">
+    EV Charging Inequality in London
+  </a>
+  <ul class="site-nav-links">
     <li><a href="#hero">Home</a></li>
     <li><a href="#intro">Introduction</a></li>
     <li><a href="#spatial">Spatial Map</a></li>
+    <li><a href="#coverage">Coverage Gap</a></li>
+    <li><a href="#inner-outer">Inner / Outer</a></li>
     <li><a href="#imd-section">Deprivation</a></li>
-    <li><a href="#factors">Explore Factors</a></li>
+    <li><a href="#demand">Demand</a></li>
     <li><a href="#borough">Borough Analysis</a></li>
+    <li><a href="#factors">Explore Factors</a></li>
     <li><a href="#discussion">Discussion</a></li>
+    <li><a href=>Methodology</a></li>
   </ul>
 </nav>
 
-<!-- Section 1: Hero -->
-<section id="hero">
-  <h1>The Uneven Geography of<br>EV Charging in London</h1>
-  <p>
-    As electric vehicle adoption accelerates across the UK, access to public
-    charging infrastructure remains deeply unequal. This project explores the
-    spatial and policy drivers behind London's EV charging divide.
-  </p>
-  <div class="key-numbers">
-    <div class="kn">
-      <div class="num">12,219</div>
-      <div class="label">Public chargers across London</div>
-    </div>
-    <div class="kn">
-      <div class="num">42.2%</div>
-      <div class="label">of LSOAs have no charger</div>
-    </div>
-    <div class="kn">
-      <div class="num">69×</div>
-      <div class="label">Gap between highest and lowest borough</div>
-    </div>
-  </div>
-  <div class="scroll-hint">↓ Scroll to explore</div>
-</section>
-
-<!-- Section 2: Introduction -->
-<section id="intro">
-  <div class="section-inner">
-    <div class="step-tag">INTRODUCTION</div>
-    <h2 class="section-title">Why does EV charging inequality matter?</h2>
-    <p class="section-body">
-      The UK government has committed to phasing out new petrol and diesel cars by 2035.
-      But the success of this transition depends critically on equitable access to charging
-      infrastructure. If public chargers are concentrated in wealthier or more central areas,
-      the green transition risks deepening existing urban inequalities.
-      <br><br>
-      This project investigates three key questions: Where are London's public chargers
-      located? What factors explain their uneven distribution? And does borough-level
-      policy play a stronger role than socioeconomic deprivation?
+<!--Title -->
+<section id="hero" class="hero-section">
+  <div class="section-shell wide-shell hero-shell">
+    <div class="section-kicker section-kicker-light">CASA0029 Urban Data Visualisation - Group 13</div>
+    <h1 class="hero-title">EV Charging Inequality in London</h1>
+    <p class="hero-copy">
+      This website examines the geography of public EV charging infrastructure across London.
+      LSOA-level mapping reveals neighbourhood-scale inequality, while deprivation, car ownership, housing type and borough-level summaries help place those spatial patterns in context.
     </p>
-    <div class="narrative-steps">
-      <div class="nstep">
-        <div class="nlabel">STEP A</div>
-        <h3>Spatial inequality exists</h3>
-        <p>Charger density varies dramatically across London's 4,994 LSOAs,
-        with a clear inner–outer divide.</p>
-      </div>
-      <div class="nstep">
-        <div class="nlabel">STEP B</div>
-        <h3>Deprivation alone doesn't explain it</h3>
-        <p>IMD and demand-side factors partially correlate with access,
-        but leave much of the variation unexplained.</p>
-      </div>
-      <div class="nstep highlight">
-        <div class="nlabel">STEP C</div>
-        <h3>Borough policy is the stronger driver</h3>
-        <p>After controlling for demand-side factors, borough-level differences
-        emerge as the key explanatory variable.</p>
-      </div>
+    <div class="key-numbers metric-grid hero-metric-grid" id="heroKeyNumbers">
+      <article class="metric-card">
+        <div class="metric-label">Public chargers</div>
+        <div class="metric-value">12,219</div>
+        <div class="metric-meta">Recorded public chargers across London.</div>
+      </article>
+      <article class="metric-card">
+        <div class="metric-label">Zero-charger LSOAs</div>
+        <div class="metric-value">42.2%</div>
+        <div class="metric-meta">Neighbourhoods with no recorded public charger.</div>
+      </article>
+      <article class="metric-card">
+        <div class="metric-label">London charger density</div>
+        <div class="metric-value">13.8</div>
+        <div class="metric-meta">Chargers per 10,000 residents across the whole city.</div>
+      </article>
+      <article class="metric-card">
+        <div class="metric-label">Borough gap ratio</div>
+        <div class="metric-value accent">69×</div>
+        <div class="metric-meta">Gap between the highest and lowest borough density.</div>
+      </article>
+    </div>
+    <a class="hero-link" href="#spatial">Explore the map and evidence ↓</a>
+  </div>
+</section>
+
+<!-- Introduction -->
+<section id="intro" class="content-section section-offwhite">
+  <div class="section-shell narrow-shell">
+    <div class="section-kicker">Introduction</div>
+    <h2 class="section-title">Why focus on public EV charging equity?</h2>
+    <p class="section-lead">
+      London’s low-carbon transition depends on charging infrastructure being available across the city, not only in a few well-served areas. Public charging is especially important where residents may have limited access to private off-street charging.
+    </p>
+    <div class="insight-grid">
+      <article class="insight-card">
+        <h3>Spatial structure matters</h3>
+        <p>Neighbourhood-level coverage can look very different from borough averages, especially where zero-charger LSOAs remain common.</p>
+      </article>
+      <article class="insight-card">
+        <h3>Demand context matters</h3>
+        <p>Car ownership is used as a demand-context proxy, not as a direct measure of EV ownership.</p>
+      </article>
+      <article class="insight-card">
+        <h3>Home-charging constraints matter</h3>
+        <p>Housing type is used as a proxy for home-charging constraints, rather than direct evidence of private parking access.</p>
+      </article>
     </div>
   </div>
 </section>
 
-<!-- Section 3: Spatial Map -->
-<section id="spatial">
-  <iframe src="map.html" title="EV Charging Spatial Distribution"></iframe>
+<!-- Spatial Map -->
+<section id="spatial" class="content-section section-map">
+  <div class="section-shell wide-shell" style="padding:0;">
+    <iframe src="map.html" title="EV Charging Spatial Distribution"></iframe>
+    <p class="source-note">Source: OSM API, IMD, LSOAs Population, London Boundary EW BGC.</p>
+  </div>
 </section>
 
-<!-- Section 4: IMD (组员做) -->
-<section id="imd-section">
-  <div class="section-inner">
-    <div class="step-tag">STEP B · PART 1</div>
+<section id="coverage" class="content-section section-white">
+  <div class="section-shell wide-shell">
+    <div class="section-kicker">Basic coverage gap</div>
+    <h2 class="section-title">How many neighbourhoods still have no recorded public charger?</h2>
+    <p class="section-lead">
+      Basic access measures whether an LSOA contains at least one recorded public charger. It does not measure walking distance,
+      charger quality or private charging access.
+    </p>
+    <div class="chart-panel" style="margin-top:24px;">
+      <div class="chart-wrap-short">
+        <canvas id="coverageGapChart"></canvas>
+      </div>
+    </div>
+    <p class="source-note">Source:  OSM, London Boundary EW BGC.</p>
+</section>
+
+<section id="inner-outer" class="content-section section-offwhite">
+  <div class="section-shell wide-shell">
+    <div class="section-kicker">Inner vs Outer London</div>
+    <h2 class="section-title">How different are Inner and Outer London charging conditions?</h2>
+    <p class="section-lead">
+      Inner/Outer comparison helps separate spatial structure from deprivation. Outer London may have higher car ownership,
+      while Inner London may have more flats and more limited home-charging opportunities.
+    </p>
+    <div id="innerOuterSummaryCards" class="compare-card-grid inner-outer-card-grid"></div>
+    <p class="source-note">Source: OSM, LSOAs Population, Census TS044 + TS045 + London Boundary.</p>
+  </div>
+</section>
+
+<!-- Two summary charts showing IMD deprivation context -->
+<section id="imd-section" class="content-section section-white">
+  <div class="section-shell wide-shell">
+    <div class="section-kicker">Deprivation and basic access</div>
     <h2 class="section-title">Does deprivation explain the gap?</h2>
-    <p class="section-body">
+    <p class="section-lead">
       The Index of Multiple Deprivation (IMD) measures socioeconomic disadvantage
       across England. We examine whether more deprived areas systematically have
-      fewer public EV chargers — and find that while a relationship exists,
-      it is weaker than expected. Car ownership patterns further contextualise
-      demand-side variation across neighbourhoods.
+      fewer public EV chargers, and find that while a relationship exists,
+      it is not sufficient on its own to explain London's charging geography.
+      Car ownership patterns provide additional demand-side context rather than causal proof.
     </p>
-    <div class="placeholder-map">[ IMD + Car Ownership analysis — to be added ]</div>
+    <div class="chart-grid">
+      <div class="chart-panel">
+        <h3>Average charger density by IMD decile</h3>
+        <div class="chart-wrap">
+          <canvas id="imdDensityChart"></canvas>
+        </div>
+        <p>IMD decile (1 = most deprived, 10 = least deprived)</p>
+      </div>
+      <div class="chart-panel">
+        <h3>LSOAs with at least one charger</h3>
+        <div class="chart-wrap">
+          <canvas id="imdCoverageChart"></canvas>
+        </div>
+        <p>IMD decile (1 = most deprived, 10 = least deprived)</p>
+      </div>
+    </div>
+    <p class="source-note">Source: OCM, LSOAs Population, IMD.</p>
   </div>
 </section>
 
-<!-- Section 5: Explore Factors -->
-<section id="factors">
+<section id="demand" class="content-section section-white">
+  <div class="section-shell wide-shell">
+    <div class="section-kicker">Car ownership</div>
+    <h2 class="section-title">How does charging provision compare with borough-level car ownership?</h2>
+    <p class="section-lead">
+      Car ownership is used as a proxy for potential car-based charging demand. It is not a direct measure of EV ownership.
+    </p>
+    <div class="chart-panel" style="margin-top:24px;">
+      <div class="chart-filter-bar" id="demandFilterBar">
+        <button class="chart-filter-btn active" type="button" onclick="setDemandFilter('all', this)">All boroughs</button>
+        <button class="chart-filter-btn" type="button" onclick="setDemandFilter('Inner', this)">Inner London</button>
+        <button class="chart-filter-btn" type="button" onclick="setDemandFilter('Outer', this)">Outer London</button>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="demandStandaloneChart"></canvas>
+      </div>
+    </div>
+    <p class="source-note">Source: OCM, LSOAs Population, Census TS044 + TS045.</p>
+  </div>
+</section>
+
+<section id="housing" class="content-section section-offwhite">
+  <div class="section-shell wide-shell">
+    <div class="section-kicker">Housing type</div>
+    <h2 class="section-title">Where do car ownership and flat-dominated housing overlap?</h2>
+    <p class="section-lead">
+      Housing type is used as a proxy for home-charging constraints. Flats and apartments may have less access to private off-street charging than detached or terraced housing, but this is not direct parking data.
+    </p>
+    <div class="chart-panel" style="margin-top:24px;">
+      <div class="chart-wrap">
+        <canvas id="housingConstraintChart"></canvas>
+      </div>
+    </div>
+    <p class="source-note">Source: OCM, LSOAs Population, Census TS044 + TS045.</p>
+  </div>
+</section>
+
+<!-- Borough summary cards + ranking chart -->
+<section id="borough" class="content-section section-white">
+  <div class="section-shell wide-shell">
+    <div class="section-kicker">Borough-level differences</div>
+    <h2 class="section-title">Borough-level differences and uneven rollout patterns</h2>
+    <p class="section-lead">
+      Borough-level variation remains one of the clearest patterns in the London EV charging landscape. Some boroughs such as Westminster and Hammersmith & Fulham shows a much higher public charger density than several boroughs in east and outer London. This pattern is consistent with uneven local rollout, but it does not by itself prove a single policy explanation.
+    </p>
+    <div id="boroughSummaryCards" class="metric-grid borough-card-grid mini-card-grid"></div>
+    <div class="chart-panel" style="margin-top:28px;">
+      <h3>Borough charger density ranking</h3>
+      <div class="chart-wrap-tall">
+        <canvas id="boroughRankingChart"></canvas>
+      </div>
+      <p>Public EV chargers per 10,000 residents, ranked by borough.</p>
+    </div>
+    <p class="source-note">Source: OCM, LSOAs Population, Census TS044 + TS045.</p>
+  </div>
+</section>
+
+<!-- Supplementary factors -->
+<section id="factors" class="content-section section-offwhite">
   <div class="factors-inner">
-    <div class="step-tag">STEP B · PART 2</div>
+    <div class="section-kicker">Supplementary context</div>
     <h2 class="section-title">Exploring additional factors</h2>
-    <p class="section-body">
-      Beyond deprivation, we explore how housing type, occupation type,
-      and public transport accessibility relate to EV charging provision
-      across London's neighbourhoods.
+    <p class="section-lead">
+      Beyond deprivation, these visualisation modules add extra context on housing, occupation and public transport accessibility. They support interpretation of uneven charging provision, but they are not treated here as causal proof.
+    </p>
+    <p class="caption-note" style="max-width:var(--copy-max);">
+      Housing type is used as a proxy for home-charging constraints, occupation remains supplementary context, and PTAL provides an additional urban structure comparison.
     </p>
 
     <div class="factor-tabs">
-      <button class="ftab active" onclick="showFactor('housing')">Housing Type</button>
-      <button class="ftab" onclick="showFactor('occupation')">Occupation</button>
-      <button class="ftab" onclick="showFactor('ptal')">Public Transport (PTAL)</button>
+      <button class="ftab active" onclick="showFactor('housing', this)">Housing</button>
+      <button class="ftab" onclick="showFactor('occupation', this)">Occupation (Supplementary)</button>
+      <button class="ftab" onclick="showFactor('ptal', this)">Public Transport (PTAL)</button>
     </div>
 
     <div id="factor-housing" class="factor-content active">
-  <iframe src="housing.html" style="width:100%;height:85vh;border:none;border-radius:10px;margin-top:8px;box-shadow:0 4px 20px rgba(0,0,0,0.08)"></iframe>
-     </div>
+      <iframe src="housing.html"
+        style="width:100%;height:85vh;border:none;border-radius:10px;margin-top:8px;box-shadow:0 4px 20px rgba(0,0,0,0.08)">
+      </iframe>
+    </div>
+
     <div id="factor-occupation" class="factor-content">
+      <p class="caption-note" style="max-width:820px;margin:8px 0 16px;">
+        Occupational composition is included as supplementary socio-economic context. It is not used here as a primary explanation
+        for public charging inequality.
+      </p>
       <iframe src="occupation.html"
         style="width:100%;height:85vh;border:none;border-radius:10px;margin-top:8px;
                box-shadow:0 4px 20px rgba(0,0,0,0.08)">
@@ -467,38 +767,22 @@
   </div>
 </section>
 
-<!-- Section 6: Borough (C做) -->
-<section id="borough">
-  <div class="section-inner">
-    <div class="step-tag green">STEP C — BOROUGH POLICY</div>
-    <h2 class="section-title">Borough policy as the key driver</h2>
-    <p class="section-body">
-      After accounting for demand-side factors, borough-level variation emerges as
-      the strongest predictor of charger density. Boroughs with proactive EV
-      infrastructure policies — such as Westminster and Hammersmith & Fulham —
-      show dramatically higher provision than comparable areas in east and outer London.
-    </p>
-    <div class="placeholder-chart">[ Borough ranking chart — to be added ]</div>
-  </div>
-</section>
-
-<!-- Section 7: Discussion -->
-<section id="discussion">
-  <div class="section-inner">
-    <div class="step-tag" style="background:rgba(255,255,255,0.18)">DISCUSSION</div>
-    <h2 class="section-title">Key Findings</h2>
-    <p class="section-body">
-      Our analysis reveals that EV charging inequality in London is primarily driven
-      by geography and local policy, rather than socioeconomic deprivation alone.
+<!-- Discussion -->
+<section id="discussion" class="content-section section-dark">
+  <div class="section-shell wide-shell">
+    <div class="section-kicker section-kicker-light">Discussion</div>
+    <h2 class="section-title section-title-light">Key Findings</h2>
+    <p class="section-lead section-lead-light">
+      Our analysis suggests that EV charging inequality in London reflects a combination of geography, uneven rollout patterns, deprivation and demand-side context.
     </p>
     <div class="conclusion-grid">
       <div class="conclusion-card">
         <h3>Spatial divide</h3>
         <p>Inner London boroughs have significantly higher charger density, reflecting
-        both higher demand and stronger policy commitment from local authorities.</p>
+        both stronger existing provision and a clear inner–outer spatial divide.</p>
       </div>
       <div class="conclusion-card">
-        <h3>Borough policy matters</h3>
+        <h3>Borough differences matter</h3>
         <p>The gap between highest (Hammersmith & Fulham, 94.5/10k) and lowest
         (Havering, 1.4/10k) boroughs is 69×, far exceeding what deprivation
         alone can explain.</p>
@@ -506,7 +790,7 @@
       <div class="conclusion-card">
         <h3>Deprivation is a secondary factor</h3>
         <p>While IMD correlates with charger access, its explanatory power is limited
-        once spatial and policy factors are controlled for.</p>
+        and does not fully explain the observed charging pattern across London.</p>
       </div>
       <div class="conclusion-card">
         <h3>Demand-side context</h3>
@@ -515,34 +799,722 @@
         public charging provision.</p>
       </div>
     </div>
+    <div class="method-link-wrap">
+      <a class="method-link" href=>Read methodology, data sources, and limitations →</a>
+    </div>
   </div>
 </section>
 
-<footer>
-  Data: OpenChargeMap · ONS Geography · IMD 2025 · Census 2021 · TfL PTAL &nbsp;|&nbsp;
-  CASA0029 Urban Data Visualisation · Group 13 · UCL 2026
+<footer class="site-footer">
+  <div class="section-shell wide-shell footer-shell">
+    <div>Data: OpenChargeMap · ONS Geography · IMD 2025 · Census 2021 · TfL PTAL</div>
+    <div>CASA0029 Urban Data Visualisation · Group 13 · UCL 2026 · <a href=>Methodology</a></div>
+  </div>
 </footer>
 
 <script>
-  function showFactor(id) {
+  let imdDensityChart, imdCoverageChart;
+  let coverageGapChart;
+  let demandStandaloneChart;
+  let housingConstraintChart;
+  let boroughRankingChart;
+  let demandRowsCache = [];
+  let demandFilter = 'all';
+  const heroKeyNumbers = document.getElementById('heroKeyNumbers');
+  const innerOuterSummaryCards = document.getElementById('innerOuterSummaryCards');
+  const boroughSummaryCards = document.getElementById('boroughSummaryCards');
+
+  // Reusable HTML builder for the small metric cards used in hero / borough summaries
+  function renderMetricCard(card) {
+    return `
+      <article class="metric-card">
+        <div class="metric-label">${card.label}</div>
+        <div class="metric-value ${card.accent ? 'accent' : ''}">${card.value}</div>
+        <div class="metric-meta">${card.meta}</div>
+      </article>
+    `;
+  }
+
+  // Reusable comparison card for Inner vs Outer London summaries
+  function buildCompareCard(title, innerValue, outerValue, suffix = '') {
+    return `
+      <article class="compare-card">
+        <h3>${title}</h3>
+        <div class="compare-split">
+          <div class="compare-pill">
+            <span class="compare-pill-label">Inner London</span>
+            <span class="compare-pill-value">__INNER__</span>
+          </div>
+          <div class="compare-pill">
+            <span class="compare-pill-label">Outer London</span>
+            <span class="compare-pill-value">__OUTER__</span>
+          </div>
+        </div>
+      </article>
+    `.replace('__INNER__', formatCardValue(innerValue, suffix))
+     .replace('__OUTER__', formatCardValue(outerValue, suffix));
+  }
+
+  // Keeps number formatting consistent across summary cards
+  function formatCardValue(value, suffix = '') {
+    const numericValue = Number(value);
+    if (!Number.isFinite(numericValue)) return 'N/A';
+    return `${numericValue.toFixed(suffix === '' ? 1 : (suffix === '%' ? 1 : 2))}${suffix}`;
+  }
+
+  // Tab switcher for supplementary iframe based factor modules.
+  function showFactor(id, button) {
     document.querySelectorAll('.factor-content').forEach(el => el.classList.remove('active'));
     document.querySelectorAll('.ftab').forEach(el => el.classList.remove('active'));
     document.getElementById('factor-' + id).classList.add('active');
-    event.target.classList.add('active');
+    if (button) button.classList.add('active');
   }
 
+  // Button filter for the borough demand scatter plot.
+  // This replaces the less polished default Chart.js
+  function setDemandFilter(filterValue, button) {
+    demandFilter = filterValue;
+    document.querySelectorAll('#demandFilterBar .chart-filter-btn').forEach(btn => btn.classList.remove('active'));
+    if (button) button.classList.add('active');
+    if (demandRowsCache.length) renderDemandChart(demandRowsCache);
+  }
+
+  // Lightweight CSV parser used to avoid adding extra dependencies
+  // Good enough for the processed project CSV files fetched by this page
+  function parseCsv(text) {
+    const rows = [];
+    let current = '';
+    let row = [];
+    let inQuotes = false;
+
+    for (let i = 0; i < text.length; i++) {
+      const char = text[i];
+      const next = text[i + 1];
+
+      if (char === '"') {
+        if (inQuotes && next === '"') {
+          current += '"';
+          i++;
+        } else {
+          inQuotes = !inQuotes;
+        }
+      } else if (char === ',' && !inQuotes) {
+        row.push(current);
+        current = '';
+      } else if ((char === '\n' || char === '\r') && !inQuotes) {
+        if (char === '\r' && next === '\n') i++;
+        row.push(current);
+        if (row.some(cell => cell !== '')) rows.push(row);
+        row = [];
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+
+    if (current.length || row.length) {
+      row.push(current);
+      rows.push(row);
+    }
+
+    const headers = rows.shift().map(h => h.replace(/^"|"$/g, '').trim());
+    return rows.map(values => {
+      const obj = {};
+      headers.forEach((header, index) => {
+        obj[header] = (values[index] ?? '').replace(/^"|"$/g, '').trim();
+      });
+      return obj;
+    });
+  }
+
+  // Builds the two IMD charts from processed summary rows.
+  function renderImdCharts(rows) {
+    const labels = rows.map(row => row.imd_decile);
+    const density = rows.map(row => row.avg_chargers_per_10k);
+    const coverage = rows.map(row => row.pct_with_charger);
+
+    if (imdDensityChart) imdDensityChart.destroy();
+    imdDensityChart = new Chart(document.getElementById('imdDensityChart'), {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          data: density,
+          backgroundColor: '#2d6a4f',
+          borderRadius: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: {
+            title: { display: true, text: 'IMD decile', color: '#5a5a58', font: { size: 11, weight: '600' } },
+            ticks: { color: '#5a5a58' },
+            grid: { display: false }
+          },
+          y: {
+            beginAtZero: true,
+            title: { display: true, text: 'Chargers per 10,000 residents', color: '#5a5a58', font: { size: 11, weight: '600' } },
+            ticks: { color: '#5a5a58' },
+            grid: { color: '#e8e4da' }
+          }
+        }
+      }
+    });
+
+    if (imdCoverageChart) imdCoverageChart.destroy();
+    imdCoverageChart = new Chart(document.getElementById('imdCoverageChart'), {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{
+          data: coverage,
+          borderColor: '#e07b39',
+          backgroundColor: 'rgba(224,123,57,0.14)',
+          fill: true,
+          tension: 0.25,
+          pointRadius: 4,
+          pointBackgroundColor: '#e07b39'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: {
+            title: { display: true, text: 'IMD decile', color: '#5a5a58', font: { size: 11, weight: '600' } },
+            ticks: { color: '#5a5a58' },
+            grid: { display: false }
+          },
+          y: {
+            beginAtZero: true,
+            max: 100,
+            title: { display: true, text: 'LSOAs with at least one charger (%)', color: '#5a5a58', font: { size: 11, weight: '600' } },
+            ticks: { color: '#5a5a58' },
+            grid: { color: '#e8e4da' }
+          }
+        }
+      }
+    });
+  }
+
+  // Computes London headline figures for the hero cards from processed CSV inputs.
+  function renderHeroMetrics(rows, innerOuterRows) {
+    if (!heroKeyNumbers || !rows.length) return;
+
+    const data = rows.map(row => ({
+      total_chargers: Number(row.total_chargers),
+      total_population: Number(row.total_population),
+      chargers_per_10k: Number(row.chargers_per_10k)
+    })).filter(row => Number.isFinite(row.total_chargers) && Number.isFinite(row.total_population) && Number.isFinite(row.chargers_per_10k));
+
+    if (!data.length) return;
+
+    const zones = {};
+    innerOuterRows.forEach(row => {
+      zones[row.inner_outer] = {
+        lsoa_count: Number(row.lsoa_count),
+        pct_zero_charger_lsoas: Number(row.pct_zero_charger_lsoas)
+      };
+    });
+
+    const inner = zones['Inner'];
+    const outer = zones['Outer'];
+    const totalLsoas = inner && outer ? inner.lsoa_count + outer.lsoa_count : 0;
+    const wholeZeroShare = totalLsoas
+      ? ((inner.pct_zero_charger_lsoas * inner.lsoa_count) + (outer.pct_zero_charger_lsoas * outer.lsoa_count)) / totalLsoas
+      : 42.2;
+
+    const totalChargers = data.reduce((sum, row) => sum + row.total_chargers, 0);
+    const totalPopulation = data.reduce((sum, row) => sum + row.total_population, 0);
+    const londonChargersPer10k = totalPopulation > 0 ? totalChargers / totalPopulation * 10000 : null;
+    const highest = data.reduce((best, row) => row.chargers_per_10k > best.chargers_per_10k ? row : best, data[0]);
+    const lowest = data.reduce((best, row) => row.chargers_per_10k < best.chargers_per_10k ? row : best, data[0]);
+    const ratio = lowest.chargers_per_10k > 0 ? highest.chargers_per_10k / lowest.chargers_per_10k : null;
+
+    const cards = [
+      {
+        label: 'Public chargers',
+        value: totalChargers.toLocaleString('en-GB'),
+        meta: 'Recorded public chargers across London.'
+      },
+      {
+        label: 'Zero-charger LSOAs',
+        value: `${wholeZeroShare.toFixed(1)}%`,
+        meta: `${totalLsoas.toLocaleString('en-GB')} LSOAs in total.`
+      },
+      {
+        label: 'London charger density',
+        value: londonChargersPer10k !== null ? londonChargersPer10k.toFixed(1) : 'N/A',
+        meta: 'Chargers per 10,000 residents across the whole city.'
+      },
+      {
+        label: 'Borough gap ratio',
+        value: ratio ? `${ratio.toFixed(1)}×` : 'N/A',
+        meta: `${highest.borough} versus ${lowest.borough} by chargers per 10,000 residents.`
+      }
+    ];
+
+    heroKeyNumbers.innerHTML = cards.map(renderMetricCard).join('');
+  }
+
+  // Renders Inner / Outer cards and the small whole-London coverage comparison chart
+  function renderInnerOuterCards(rows) {
+    if (!innerOuterSummaryCards) return;
+
+    const byZone = {};
+    rows.forEach(row => {
+      byZone[row.inner_outer] = row;
+    });
+
+    const inner = byZone['Inner'];
+    const outer = byZone['Outer'];
+    if (!inner || !outer) return;
+
+    innerOuterSummaryCards.innerHTML = [
+      buildCompareCard('Weighted chargers per 10,000 residents', inner.weighted_chargers_per_10k, outer.weighted_chargers_per_10k, ''),
+      buildCompareCard('Median chargers per 10,000 residents', inner.median_chargers_per_10k, outer.median_chargers_per_10k, ''),
+      buildCompareCard('Percentage(%) of zero-charger LSOAs', inner.pct_zero_charger_lsoas, outer.pct_zero_charger_lsoas, '%'),
+      buildCompareCard('Percentage(%) of car-owning households', inner.pct_car_owning_households, outer.pct_car_owning_households, '%'),
+      buildCompareCard('Percentage(%) of flats / apartments', inner.pct_flats_apartments, outer.pct_flats_apartments, '%'),
+      buildCompareCard('Chargers per 1,000 car-owning households', inner.chargers_per_1000_car_owning_households, outer.chargers_per_1000_car_owning_households, '')
+    ].join('');
+
+    const innerLsoas = Number(inner.lsoa_count);
+    const outerLsoas = Number(outer.lsoa_count);
+    const totalLsoas = innerLsoas + outerLsoas;
+    const wholeWith = totalLsoas
+      ? ((100 - Number(inner.pct_zero_charger_lsoas)) * innerLsoas + (100 - Number(outer.pct_zero_charger_lsoas)) * outerLsoas) / totalLsoas
+      : 0;
+    const wholeWithout = totalLsoas
+      ? ((Number(inner.pct_zero_charger_lsoas) * innerLsoas) + (Number(outer.pct_zero_charger_lsoas) * outerLsoas)) / totalLsoas
+      : 0;
+
+    if (coverageGapChart) coverageGapChart.destroy();
+    coverageGapChart = new Chart(document.getElementById('coverageGapChart'), {
+      type: 'bar',
+      data: {
+        labels: ['Whole London', 'Inner London', 'Outer London'],
+        datasets: [
+          {
+            label: 'LSOAs with at least one charger',
+            data: [wholeWith, 100 - Number(inner.pct_zero_charger_lsoas), 100 - Number(outer.pct_zero_charger_lsoas)],
+            backgroundColor: '#2d6a4f',
+            borderRadius: 4
+          },
+          {
+            label: 'Zero-charger LSOAs',
+            data: [wholeWithout, Number(inner.pct_zero_charger_lsoas), Number(outer.pct_zero_charger_lsoas)],
+            backgroundColor: '#e07b39',
+            borderRadius: 4
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: true,
+            onClick: () => {}
+          }
+        },
+        scales: {
+          x: {
+            ticks: { color: '#5a5a58' },
+            grid: { display: false }
+          },
+          y: {
+            beginAtZero: true,
+            max: 100,
+            title: { display: true, text: 'Share of LSOAs (%)', color: '#5a5a58', font: { size: 11, weight: '600' } },
+            ticks: { color: '#5a5a58' },
+            grid: { color: '#e8e4da' }
+          }
+        }
+      }
+    });
+
+  }
+
+  // Splits borough demand rows into Inner / Outer datasets for the scatter chart.
+  function buildDemandDatasets(rows) {
+    const data = rows.map(row => ({
+      x: Number(row.pct_car_owning_households),
+      y: Number(row.chargers_per_1000_car_owning_households),
+      borough: row.borough,
+      inner_outer: row.inner_outer,
+      zero_share: Number(row.pct_zero_charger_lsoas)
+    }));
+
+    return [
+      {
+        label: 'Inner London',
+        data: data.filter(row => row.inner_outer === 'Inner'),
+        pointRadius: 6,
+        pointBackgroundColor: '#2d6a4f'
+      },
+      {
+        label: 'Outer London',
+        data: data.filter(row => row.inner_outer === 'Outer'),
+        pointRadius: 6,
+        pointBackgroundColor: '#74c69d'
+      }
+    ];
+  }
+
+  // Renders the borough demand scatter plot.
+  // Uses the current button state (all / inner / outer) to decide what to show.
+  function renderDemandChart(rows) {
+    const filteredRows = demandFilter === 'all'
+      ? rows
+      : rows.filter(row => row.inner_outer === demandFilter);
+
+    const datasets = demandFilter === 'all'
+      ? buildDemandDatasets(filteredRows)
+      : [{
+          label: demandFilter === 'Inner' ? 'Inner London' : 'Outer London',
+          data: filteredRows.map(row => ({
+            x: Number(row.pct_car_owning_households),
+            y: Number(row.chargers_per_1000_car_owning_households),
+            borough: row.borough,
+            inner_outer: row.inner_outer,
+            zero_share: Number(row.pct_zero_charger_lsoas)
+          })),
+          pointRadius: 6,
+          pointBackgroundColor: demandFilter === 'Inner' ? '#2d6a4f' : '#74c69d'
+        }];
+
+    if (demandStandaloneChart) demandStandaloneChart.destroy();
+    demandStandaloneChart = new Chart(document.getElementById('demandStandaloneChart'), {
+      type: 'scatter',
+      data: { datasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            callbacks: {
+              title: items => items[0].raw.borough,
+              label: context => {
+                const point = context.raw;
+                return [
+                  `${point.inner_outer} London`,
+                  `Car-owning households: ${point.x.toFixed(1)}%`,
+                  `Chargers per 1,000 car-owning households: ${point.y.toFixed(2)}`,
+                  `Zero-charger LSOAs: ${point.zero_share.toFixed(1)}%`
+                ];
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            beginAtZero: true,
+            title: { display: true, text: 'Car-owning households (%)', color: '#5a5a58', font: { size: 11, weight: '600' } },
+            ticks: { color: '#5a5a58' },
+            grid: { color: '#e8e4da' }
+          },
+          y: {
+            beginAtZero: true,
+            title: { display: true, text: 'Chargers per 1,000 car-owning households', color: '#5a5a58', font: { size: 11, weight: '600' } },
+            ticks: { color: '#5a5a58' },
+            grid: { color: '#e8e4da' }
+          }
+        }
+      }
+    });
+  }
+
+  // Renders the housing-context scatter plot.
+  // Point size is scaled by chargers per 1,000 car-owning households.
+  function renderHousingChart(rows) {
+    const data = rows.map(row => ({
+      x: Number(row.pct_car_owning_households),
+      y: Number(row.pct_flats_apartments),
+      size: Number(row.chargers_per_1000_car_owning_households),
+      borough: row.borough,
+      inner_outer: row.inner_outer
+    }));
+
+    if (housingConstraintChart) housingConstraintChart.destroy();
+    housingConstraintChart = new Chart(document.getElementById('housingConstraintChart'), {
+      type: 'scatter',
+      data: {
+        datasets: [{
+          label: 'Boroughs',
+          data,
+          pointRadius: context => {
+            const value = context.raw?.size;
+            if (!Number.isFinite(value)) return 5;
+            return Math.max(5, Math.min(14, value * 0.45 + 4));
+          },
+          pointBackgroundColor: context => context.raw?.inner_outer === 'Inner' ? '#2d6a4f' : '#e07b39',
+          pointBorderColor: '#ffffff',
+          pointBorderWidth: 1.2
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            callbacks: {
+              title: items => items[0].raw.borough,
+              label: context => {
+                const point = context.raw;
+                return [
+                  `${point.inner_outer} London`,
+                  `Car-owning households: ${point.x.toFixed(1)}%`,
+                  `Flats / apartments: ${point.y.toFixed(1)}%`,
+                  `Chargers per 1,000 car-owning households: ${point.size.toFixed(2)}`
+                ];
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            beginAtZero: true,
+            title: { display: true, text: 'Car-owning households (%)', color: '#5a5a58', font: { size: 11, weight: '600' } },
+            ticks: { color: '#5a5a58' },
+            grid: { color: '#e8e4da' }
+          },
+          y: {
+            beginAtZero: true,
+            title: { display: true, text: 'Flats / apartments (%)', color: '#5a5a58', font: { size: 11, weight: '600' } },
+            ticks: { color: '#5a5a58' },
+            grid: { color: '#e8e4da' }
+          }
+        }
+      }
+    });
+  }
+
+  // Builds borough-level summary cards and the ranked horizontal borough bar chart
+  function renderBoroughChart(rows) {
+    const sorted = rows
+      .map(row => ({
+        borough: row.borough,
+        inner_outer: row.inner_outer,
+        chargers_per_10k: Number(row.chargers_per_10k),
+        pct_zero_charger_lsoas: Number(row.pct_zero_charger_lsoas),
+        pct_car_owning_households: Number(row.pct_car_owning_households)
+      }))
+      .sort((a, b) => b.chargers_per_10k - a.chargers_per_10k);
+
+    if (boroughSummaryCards && sorted.length) {
+      const highest = sorted[0];
+      const lowest = sorted[sorted.length - 1];
+      const ratio = lowest.chargers_per_10k > 0 ? highest.chargers_per_10k / lowest.chargers_per_10k : null;
+      boroughSummaryCards.innerHTML = [
+        renderMetricCard({
+          label: 'Highest borough',
+          value: highest.borough,
+          meta: `${highest.chargers_per_10k.toFixed(1)} chargers per 10,000 residents.`
+        }),
+        renderMetricCard({
+          label: 'Lowest borough',
+          value: lowest.borough,
+          meta: `${lowest.chargers_per_10k.toFixed(1)} chargers per 10,000 residents.`
+        }),
+        renderMetricCard({
+          label: 'Density ratio gap',
+          value: ratio ? `${ratio.toFixed(1)}×` : 'N/A',
+          meta: 'Gap between the highest and lowest borough charger density.',
+          accent: true
+        }),
+        renderMetricCard({
+          label: 'Weakest borough zero-charger share',
+          value: `${lowest.pct_zero_charger_lsoas.toFixed(1)}%`,
+          meta: `${lowest.borough} LSOAs with zero recorded public charger.`
+        })
+      ].join('');
+    }
+
+    const colors = sorted.map((row, index) => {
+      if (index < 5) return '#1b4332';
+      if (index >= sorted.length - 5) return '#e07b39';
+      return row.inner_outer === 'Inner' ? '#74c69d' : '#d8e4db';
+    });
+
+    if (boroughRankingChart) boroughRankingChart.destroy();
+    boroughRankingChart = new Chart(document.getElementById('boroughRankingChart'), {
+      type: 'bar',
+      data: {
+        labels: sorted.map(row => row.borough),
+        datasets: [{
+          data: sorted.map(row => row.chargers_per_10k),
+          backgroundColor: colors,
+          borderRadius: 4,
+          borderSkipped: false,
+          barThickness: 13,
+          maxBarThickness: 15
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        indexAxis: 'y',
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              title: items => items[0].label,
+              label: context => {
+                const row = sorted[context.dataIndex];
+                return [
+                  `${row.inner_outer} London`,
+                  `Chargers per 10,000 residents: ${row.chargers_per_10k.toFixed(1)}`,
+                  `Zero-charger LSOAs: ${row.pct_zero_charger_lsoas.toFixed(1)}%`,
+                  `Car-owning households: ${row.pct_car_owning_households.toFixed(1)}%`
+                ];
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            beginAtZero: true,
+            title: { display: true, text: 'Chargers per 10,000 residents', color: '#5a5a58', font: { size: 11, weight: '600' } },
+            ticks: { color: '#5a5a58' },
+            grid: { color: '#e8e4da' }
+          },
+          y: {
+            ticks: { color: '#5a5a58', autoSkip: false, font: { size: 11 } },
+            grid: { display: false }
+          }
+        }
+      }
+    });
+  }
+
+  // Fetch helpers below keep data loading separate from rendering logic.
+  function loadImdCharts() {
+    fetch('data/imd_summary.csv')
+      .then(response => {
+        if (!response.ok) throw new Error(`Failed to fetch IMD summary: ${response.status}`);
+        return response.text();
+      })
+      .then(text => parseCsv(text))
+      .then(rows => rows.map(row => ({
+        imd_decile: Number(row.imd_decile),
+        avg_chargers_per_10k: Number(row.avg_chargers_per_10k),
+        pct_with_charger: Number(row.pct_with_charger)
+      })))
+      .then(rows => rows.sort((a, b) => a.imd_decile - b.imd_decile))
+      .then(renderImdCharts)
+      .catch(error => {
+        console.error(error);
+      });
+  }
+
+  function loadInnerOuterSummary() {
+    fetch('data/inner_outer_summary.csv')
+      .then(response => {
+        if (!response.ok) throw new Error(`Failed to fetch inner/outer summary: ${response.status}`);
+        return response.text();
+      })
+      .then(text => parseCsv(text))
+      .then(renderInnerOuterCards)
+      .catch(error => {
+        console.error(error);
+      });
+  }
+
+  function loadDemandChart() {
+    fetch('data/borough_demand_summary.csv')
+      .then(response => {
+        if (!response.ok) throw new Error(`Failed to fetch borough demand summary: ${response.status}`);
+        return response.text();
+      })
+      .then(text => parseCsv(text))
+      .then(rows => {
+        demandRowsCache = rows;
+        renderDemandChart(rows);
+      })
+      .catch(error => {
+        console.error(error);
+      });
+  }
+
+  function loadHousingChart() {
+    fetch('data/borough_demand_summary.csv')
+      .then(response => {
+        if (!response.ok) throw new Error(`Failed to fetch borough demand summary for housing chart: ${response.status}`);
+        return response.text();
+      })
+      .then(text => parseCsv(text))
+      .then(renderHousingChart)
+      .catch(error => {
+        console.error(error);
+      });
+  }
+
+  function loadHeroMetrics() {
+    Promise.all([
+      fetch('data/borough_demand_summary.csv').then(response => {
+        if (!response.ok) throw new Error(`Failed to fetch borough demand summary for hero metrics: ${response.status}`);
+        return response.text();
+      }),
+      fetch('data/inner_outer_summary.csv').then(response => {
+        if (!response.ok) throw new Error(`Failed to fetch inner/outer summary for hero metrics: ${response.status}`);
+        return response.text();
+      })
+    ])
+      .then(([boroughText, innerOuterText]) => {
+        const boroughRows = parseCsv(boroughText);
+        const innerOuterRows = parseCsv(innerOuterText);
+        renderHeroMetrics(boroughRows, innerOuterRows);
+      })
+      .catch(error => {
+        console.error(error);
+      });
+  }
+
+  function loadBoroughChart() {
+    fetch('data/borough_demand_summary.csv')
+      .then(response => {
+        if (!response.ok) throw new Error(`Failed to fetch borough demand summary: ${response.status}`);
+        return response.text();
+      })
+      .then(text => parseCsv(text))
+      .then(renderBoroughChart)
+      .catch(error => {
+        console.error(error);
+      });
+  }
+
+  //highlights the matching nav item while the user scrolls
   const sections = document.querySelectorAll('section');
-  const navLinks = document.querySelectorAll('nav ul li a');
+  const navLinks = document.querySelectorAll('.site-nav-links a[href^="#"]');
   window.addEventListener('scroll', () => {
     let current = '';
     sections.forEach(s => {
       if (window.scrollY >= s.offsetTop - 80) current = s.getAttribute('id');
     });
     navLinks.forEach(link => {
-      link.classList.remove('active');
-      if (link.getAttribute('href') === '#' + current) link.classList.add('active');
+      link.classList.remove('active', 'is-active');
+      if (link.getAttribute('href') === '#' + current) link.classList.add('active', 'is-active');
     });
   });
+
+  //load all processed data files and render each view
+  loadHeroMetrics();
+  loadImdCharts();
+  loadInnerOuterSummary();
+  loadDemandChart();
+  loadHousingChart();
+  loadBoroughChart();
 </script>
 </body>
 </html>

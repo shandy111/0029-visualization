@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Occupation & EV Charging</title>
+  <title>Supplementary Socio-economic Context</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel='stylesheet' href='https://unpkg.com/maplibre-gl@5.18.0/dist/maplibre-gl.css'/>
   <script src='https://unpkg.com/maplibre-gl@5.18.0/dist/maplibre-gl.js'></script>
@@ -137,16 +137,18 @@
 </head>
 <body>
 
+<!-- Additional Socio-economic Context
+How do occupational profiles overlap with public charging provision? -->
 <div class="header">
-  Occupation Type & EV Charging Access
-  <span>How does occupational composition relate to charging inequality?</span>
+  Supplementary Socio-economic Context
+  <span>Occupation is included as contextual evidence rather than a primary explanatory indicator.</span>
 </div>
 
 <div class="main">
 
   <!-- 左侧面板 -->
   <div class="sidebar">
-    <h3>Select Occupation Type</h3>
+    <h3>Supplementary Occupation View</h3>
 
     <button class="occ-btn active" onclick="switchOcc('pct_higher', this)">
       <div class="occ-label">Higher Managerial</div>
@@ -320,7 +322,7 @@
       .then(r => r.json())
       .then(geojson => {
         const data = geojson.features.map(f => f.properties).filter(d =>
-          d.pct_higher != null && d.chargers_per_10k != null && d.chargers_per_10k < 200
+          d.pct_higher != null && d.chargers_per_10k != null && d.chargers_per_10k < 200 //silent outlier filtering
         );
 
         const inner = data.filter(d => d.inner_outer === 'Inner');
@@ -367,8 +369,8 @@
         });
 
         document.getElementById('bar-finding').textContent =
-          `LSOAs with high proportions of higher managerial residents tend to have more chargers, ` +
-          `but the pattern is not consistent across all occupation groups.`;
+          `Occupational composition is shown here as supplementary context. ` +
+          `Patterns overlap with charger density in some places, but they do not provide a strong standalone explanation.`;
 
         // 图2：Inner vs Outer职业构成
         const occLabels = ['Higher Mgr', 'Lower Mgr', 'Intermediate', 'Self-emp', 'Routine'];
@@ -415,8 +417,7 @@
         });
 
         document.getElementById('io-finding').textContent =
-          `Inner London has a higher proportion of higher managerial residents, ` +
-          `which partially overlaps with its higher charger density.`;
+          `Inner and Outer London differ in occupational composition, but occupation is treated here as contextual evidence rather than a primary driver of charging inequality.`;
       });
   }
 </script>
