@@ -599,7 +599,7 @@ tbody td {
 
 #discussion {
   position: relative;
-  background: url("../image/last.png") center center / cover no-repeat;
+  background: url("image/last.png") center center / cover no-repeat;
   overflow: hidden;
 }
 
